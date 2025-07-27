@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import mapboxgl, { type MapOptions } from "mapbox-gl";
 
 const accessToken: string = import.meta.env.VITE_MAP_BOX_ACCESS_KEY;
