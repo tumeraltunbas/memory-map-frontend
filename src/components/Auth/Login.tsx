@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../../stores/slices/userSlice';
+import { setUser } from '../../stores/slices/userSlice';
 import { authAPI } from '../../services/api';
 import { AuthLayout } from '../AuthLayout';
 
@@ -17,8 +17,12 @@ export const Login = () => {
       setError('');
 
       try {
-         const userData = await authAPI.login(email, password);
-         dispatch(login(userData));
+         await authAPI.login(email, password);
+
+         // Get user details after successful login
+         const userData = await authAPI.getCurrentUser();
+         dispatch(setUser(userData));
+
          navigate('/map');
       } catch (err) {
          setError('Invalid email or password');

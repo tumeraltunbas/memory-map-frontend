@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../../stores/slices/userSlice';
+import { setUser } from '../../stores/slices/userSlice';
 import { authAPI } from '../../services/api';
 import { AuthLayout } from '../AuthLayout';
 
@@ -23,8 +23,12 @@ export const Register = () => {
       }
 
       try {
-         const userData = await authAPI.register(email, password);
-         dispatch(login(userData)); // Log user in after successful registration
+         await authAPI.register(email, password);
+
+         // Get user details after successful registration
+         const userData = await authAPI.getCurrentUser();
+         dispatch(setUser(userData));
+
          navigate('/map');
       } catch (err) {
          setError('Failed to create account. Please try again.');

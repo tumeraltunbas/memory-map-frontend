@@ -1,25 +1,32 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { SliceNames } from '../../constants/enums';
+import type { User } from '../../types';
 
-const initialState = {
+interface UserState {
+   user: User;
+   isAuthenticated: boolean;
+}
+
+const initialState: UserState = {
    user: {
-      id: '',
+      userId: '',
       email: '',
       isActive: false,
-      createdAt: null,
-      updateAt: null,
+      createdAt: '',
+      updatedAt: '',
       markdowns: [],
    },
-   isAuthenticated: false,
+   isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
 };
 
 const userSlice = createSlice({
    name: SliceNames.USER,
    initialState: initialState,
    reducers: {
-      login(state, action) {
+      setUser(state, action) {
          state.user = { ...action.payload };
          state.isAuthenticated = true;
+         localStorage.setItem('isAuthenticated', 'true');
       },
       logout(state) {
          state.user = { ...initialState.user };
@@ -28,5 +35,5 @@ const userSlice = createSlice({
    },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { setUser, logout } = userSlice.actions;
 export default userSlice.reducer;

@@ -5,6 +5,7 @@ const api = axios.create({
    headers: {
       'Content-Type': 'application/json',
    },
+   withCredentials: true,
 });
 
 // Request interceptor to add auth token
@@ -31,22 +32,21 @@ api.interceptors.response.use(
 export const authAPI = {
    login: async (email: string, password: string) => {
       const response = await api.post('/auth/login', { email, password });
-      if (response.data.token) {
-         localStorage.setItem('token', response.data.token);
-      }
       return response.data;
    },
 
    register: async (email: string, password: string) => {
       const response = await api.post('/auth/register', { email, password });
-      if (response.data.token) {
-         localStorage.setItem('token', response.data.token);
-      }
       return response.data;
    },
 
    logout: () => {
-      localStorage.removeItem('token');
+      localStorage.removeItem('isAuthenticated');
+   },
+
+   getCurrentUser: async () => {
+      const response = await api.get('/users');
+      return response.data;
    },
 };
 
