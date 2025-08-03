@@ -1,0 +1,12 @@
+.marker {
+   cursor: pointer;
+   transition: transform 0.2s ease;
+}
+
+.marker:hover {
+   transform: scale(1.2);
+}
+
+.marker svg {
+   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
