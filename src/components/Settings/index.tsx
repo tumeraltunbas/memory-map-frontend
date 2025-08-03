@@ -5,8 +5,19 @@ import { AccountLayout } from '../AccountLayout';
 
 export const Settings = () => {
    const user = useSelector((state: RootState) => state.user.user);
-   const [emailNotifications, setEmailNotifications] = useState(true);
-   const [locationSharing, setLocationSharing] = useState(true);
+   const [showChangePassword, setShowChangePassword] = useState(false);
+   const [currentPassword, setCurrentPassword] = useState('');
+   const [newPassword, setNewPassword] = useState('');
+   const [confirmPassword, setConfirmPassword] = useState('');
+
+   const handlePasswordChange = (e: React.FormEvent) => {
+      e.preventDefault();
+      // TODO: Implement password change logic
+      setShowChangePassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+   };
 
    return (
       <AccountLayout>
@@ -14,13 +25,12 @@ export const Settings = () => {
             <div className="border-b border-gray-200 pb-6">
                <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
                <p className="mt-1 text-sm text-gray-500">
-                  Manage your account settings and preferences.
+                  Manage your account settings
                </p>
             </div>
 
             <div className="py-6">
-               {/* Account Settings */}
-               <div className="max-w-3xl">
+               <div className="max-w-xl">
                   <h3 className="text-lg font-medium text-gray-900 mb-6">
                      Account Settings
                   </h3>
@@ -30,114 +40,159 @@ export const Settings = () => {
                      <div>
                         <label
                            htmlFor="email"
-                           className="block text-sm font-medium text-gray-700"
+                           className="block text-sm font-medium text-gray-700 mb-2"
                         >
                            Email Address
                         </label>
-                        <div className="mt-1">
+                        <div className="relative">
                            <input
                               type="email"
                               name="email"
                               id="email"
-                              value={user.email}
+                              value={user?.email}
                               disabled
-                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#9E7B9B] focus:ring-[#9E7B9B] sm:text-sm bg-gray-50"
+                              className="block w-full rounded-lg border-gray-300 bg-gray-50 py-3 px-4 text-gray-900 
+                                       focus:ring-2 focus:ring-[#9E7B9B] focus:border-transparent disabled:opacity-75
+                                       shadow-sm transition-colors duration-200"
                            />
+                           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              <svg
+                                 className="h-5 w-5 text-gray-400"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                              >
+                                 <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                 />
+                              </svg>
+                           </div>
                         </div>
                      </div>
 
                      {/* Password */}
                      <div>
-                        <label
-                           htmlFor="password"
-                           className="block text-sm font-medium text-gray-700"
-                        >
-                           Password
-                        </label>
-                        <div className="mt-1">
-                           <button className="text-[#9E7B9B] hover:text-[#8B6B8B] text-sm font-medium">
-                              Change Password
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* Preferences */}
-                  <div className="mt-10">
-                     <h3 className="text-lg font-medium text-gray-900 mb-6">
-                        Preferences
-                     </h3>
-
-                     <div className="space-y-6">
-                        {/* Email Notifications */}
-                        <div className="flex items-center justify-between">
-                           <div>
-                              <h4 className="text-sm font-medium text-gray-900">
-                                 Email Notifications
-                              </h4>
-                              <p className="text-sm text-gray-500">
-                                 Receive email updates about your memories and
-                                 activity.
-                              </p>
-                           </div>
-                           <button
-                              onClick={() =>
-                                 setEmailNotifications(!emailNotifications)
-                              }
-                              className={`${
-                                 emailNotifications
-                                    ? 'bg-[#9E7B9B]'
-                                    : 'bg-gray-200'
-                              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#9E7B9B] focus:ring-offset-2`}
+                        <div className="flex items-center justify-between mb-2">
+                           <label
+                              htmlFor="password"
+                              className="block text-sm font-medium text-gray-700"
                            >
-                              <span
-                                 className={`${
-                                    emailNotifications
-                                       ? 'translate-x-5'
-                                       : 'translate-x-0'
-                                 } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                              />
-                           </button>
+                              Password
+                           </label>
+                           {!showChangePassword && (
+                              <button
+                                 onClick={() => setShowChangePassword(true)}
+                                 className="text-sm font-medium text-[#9E7B9B] hover:text-[#8B6B8B] 
+                                          transition-colors duration-200"
+                              >
+                                 Change Password
+                              </button>
+                           )}
                         </div>
 
-                        {/* Location Sharing */}
-                        <div className="flex items-center justify-between">
-                           <div>
-                              <h4 className="text-sm font-medium text-gray-900">
-                                 Location Sharing
-                              </h4>
-                              <p className="text-sm text-gray-500">
-                                 Allow the app to access your location for
-                                 better memory mapping.
-                              </p>
-                           </div>
-                           <button
-                              onClick={() =>
-                                 setLocationSharing(!locationSharing)
-                              }
-                              className={`${
-                                 locationSharing
-                                    ? 'bg-[#9E7B9B]'
-                                    : 'bg-gray-200'
-                              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#9E7B9B] focus:ring-offset-2`}
+                        {showChangePassword && (
+                           <form
+                              onSubmit={handlePasswordChange}
+                              className="bg-gray-50 rounded-lg p-6 space-y-4 border border-gray-200"
                            >
-                              <span
-                                 className={`${
-                                    locationSharing
-                                       ? 'translate-x-5'
-                                       : 'translate-x-0'
-                                 } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                              />
-                           </button>
-                        </div>
-                     </div>
-                  </div>
+                              <div>
+                                 <label
+                                    htmlFor="currentPassword"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                 >
+                                    Current Password
+                                 </label>
+                                 <div className="relative">
+                                    <input
+                                       type="password"
+                                       id="currentPassword"
+                                       value={currentPassword}
+                                       onChange={(e) =>
+                                          setCurrentPassword(e.target.value)
+                                       }
+                                       className="block w-full rounded-lg border-gray-300 py-3 px-4 text-gray-900 
+                                                focus:ring-2 focus:ring-[#9E7B9B] focus:border-transparent
+                                                shadow-sm transition-colors duration-200"
+                                       required
+                                    />
+                                 </div>
+                              </div>
 
-                  {/* Save Button */}
-                  <div className="mt-10 flex justify-end">
-                     <button className="bg-[#9E7B9B] text-white px-4 py-2 rounded-md hover:bg-[#8B6B8B] focus:outline-none focus:ring-2 focus:ring-[#9E7B9B] focus:ring-offset-2">
-                        Save Changes
-                     </button>
+                              <div>
+                                 <label
+                                    htmlFor="newPassword"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                 >
+                                    New Password
+                                 </label>
+                                 <div className="relative">
+                                    <input
+                                       type="password"
+                                       id="newPassword"
+                                       value={newPassword}
+                                       onChange={(e) =>
+                                          setNewPassword(e.target.value)
+                                       }
+                                       className="block w-full rounded-lg border-gray-300 py-3 px-4 text-gray-900 
+                                                focus:ring-2 focus:ring-[#9E7B9B] focus:border-transparent
+                                                shadow-sm transition-colors duration-200"
+                                       required
+                                    />
+                                 </div>
+                              </div>
+
+                              <div>
+                                 <label
+                                    htmlFor="confirmPassword"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                 >
+                                    Confirm New Password
+                                 </label>
+                                 <div className="relative">
+                                    <input
+                                       type="password"
+                                       id="confirmPassword"
+                                       value={confirmPassword}
+                                       onChange={(e) =>
+                                          setConfirmPassword(e.target.value)
+                                       }
+                                       className="block w-full rounded-lg border-gray-300 py-3 px-4 text-gray-900 
+                                                focus:ring-2 focus:ring-[#9E7B9B] focus:border-transparent
+                                                shadow-sm transition-colors duration-200"
+                                       required
+                                    />
+                                 </div>
+                              </div>
+
+                              <div className="flex justify-end space-x-3 pt-2">
+                                 <button
+                                    type="button"
+                                    onClick={() => {
+                                       setShowChangePassword(false);
+                                       setCurrentPassword('');
+                                       setNewPassword('');
+                                       setConfirmPassword('');
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900
+                                             transition-colors duration-200"
+                                 >
+                                    Cancel
+                                 </button>
+                                 <button
+                                    type="submit"
+                                    className="bg-[#9E7B9B] text-white px-6 py-2 rounded-lg text-sm font-medium
+                                             hover:bg-[#8B6B8B] focus:outline-none focus:ring-2 focus:ring-offset-2 
+                                             focus:ring-[#9E7B9B] transition-all duration-200"
+                                 >
+                                    Update Password
+                                 </button>
+                              </div>
+                           </form>
+                        )}
+                     </div>
                   </div>
                </div>
             </div>

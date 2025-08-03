@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 interface AccountLayoutProps {
    children: React.ReactNode;
@@ -12,6 +12,28 @@ export const AccountLayout = ({ children }: AccountLayoutProps) => {
    return (
       <div className="min-h-screen bg-[#FAFAFA]">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="mb-6 flex items-center justify-between">
+               <Link
+                  to="/map"
+                  className="inline-flex items-center text-[#9E7B9B] hover:text-[#8B6B8B] transition-colors"
+               >
+                  <svg
+                     className="w-5 h-5 mr-2"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24"
+                  >
+                     <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                     />
+                  </svg>
+                  Back to Map
+               </Link>
+            </div>
+
             <div className="flex flex-col md:flex-row gap-8">
                {/* Sidebar */}
                <div className="w-full md:w-64 flex-shrink-0">
