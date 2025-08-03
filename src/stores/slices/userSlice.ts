@@ -10,6 +10,7 @@ const initialState = {
       updateAt: null,
       markdowns: [],
    },
+   isAuthenticated: false,
 };
 
 const userSlice = createSlice({
@@ -17,11 +18,15 @@ const userSlice = createSlice({
    initialState: initialState,
    reducers: {
       login(state, action) {
-         //TODO: Example reducer function
          state.user = { ...action.payload };
+         state.isAuthenticated = true;
+      },
+      logout(state) {
+         state.user = { ...initialState.user };
+         state.isAuthenticated = false;
       },
    },
 });
 
-const { login } = userSlice.actions;
+const { login, logout } = userSlice.actions;
 export default userSlice.reducer;
