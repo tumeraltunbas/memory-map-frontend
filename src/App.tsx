@@ -1,19 +1,18 @@
 import './App.css';
-import { Header } from './components/Header';
-import { Map } from './components/Map';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Landing } from './components/Landing';
+import { MapLayout } from './components/MapLayout';
 
 function App() {
    return (
-      <>
-         <div className="relative h-screen w-screen">
-            <div className="absolute top-0 left-0 z-10 bg-transparent w-screen">
-               <Header />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-0">
-               <Map />
-            </div>
-         </div>
-      </>
+      <BrowserRouter>
+         <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/map" element={<MapLayout />} />
+            {/* Redirect any unknown routes to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+         </Routes>
+      </BrowserRouter>
    );
 }
 

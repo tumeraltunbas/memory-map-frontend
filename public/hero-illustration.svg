@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Stylized Map Background -->
+  <rect width="800" height="600" fill="#F8F9FA"/>
+  <path d="M100,100 Q400,50 700,150 T800,300" stroke="#E9ECEF" stroke-width="2" fill="none"/>
+  <path d="M0,200 Q300,250 600,150 T800,400" stroke="#E9ECEF" stroke-width="2" fill="none"/>
+  
+  <!-- Map Markers -->
+  <circle cx="300" cy="200" r="8" fill="#9E7B9B"/>
+  <circle cx="500" cy="300" r="8" fill="#9E7B9B"/>
+  <circle cx="200" cy="400" r="8" fill="#9E7B9B"/>
+  
+  <!-- Floating Photos -->
+  <rect x="250" y="150" width="100" height="100" rx="8" fill="white" stroke="#DED3D7" stroke-width="2"/>
+  <rect x="450" y="250" width="100" height="100" rx="8" fill="white" stroke="#DED3D7" stroke-width="2"/>
+  <rect x="150" y="350" width="100" height="100" rx="8" fill="white" stroke="#DED3D7" stroke-width="2"/>
+  
+  <!-- Connection Lines -->
+  <line x1="300" y1="200" x2="250" y2="150" stroke="#9E7B9B" stroke-width="2"/>
+  <line x1="500" y1="300" x2="450" y2="250" stroke="#9E7B9B" stroke-width="2"/>
+  <line x1="200" y1="400" x2="150" y2="350" stroke="#9E7B9B" stroke-width="2"/>
+</svg>
