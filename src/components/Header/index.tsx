@@ -3,10 +3,16 @@ import {
    IconMapPin,
    IconUser,
    IconSettings,
+   IconLogout,
 } from '@tabler/icons-react';
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../stores/slices/userSlice';
 
 export const Header = () => {
+   const navigate = useNavigate();
+   const dispatch = useDispatch();
    const [openMapTools, setOpenMapTools] = useState<boolean>(false);
    const [openProfile, setOpenProfile] = useState<boolean>(false);
    const [activeMapTool, setActiveMapTool] = useState<'hand' | 'location'>(
@@ -50,6 +56,11 @@ export const Header = () => {
       ) : (
          <IconHandStop className="w-5 h-5" />
       );
+   };
+
+   const handleLogout = () => {
+      dispatch(logout());
+      navigate('/');
    };
 
    return (
@@ -122,22 +133,39 @@ export const Header = () => {
                         role="menu"
                         aria-orientation="vertical"
                      >
-                        <a
-                           href="/profile"
-                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                        <button
+                           onClick={() => {
+                              navigate('/profile');
+                              setOpenProfile(false);
+                           }}
+                           className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                            role="menuitem"
                         >
                            <IconUser className="w-5 h-5 mr-3" />
                            <span>Profile</span>
-                        </a>
-                        <a
-                           href="/settings"
-                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                        </button>
+                        <button
+                           onClick={() => {
+                              navigate('/settings');
+                              setOpenProfile(false);
+                           }}
+                           className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                            role="menuitem"
                         >
                            <IconSettings className="w-5 h-5 mr-3" />
                            <span>Settings</span>
-                        </a>
+                        </button>
+                        <button
+                           onClick={() => {
+                              handleLogout();
+                              setOpenProfile(false);
+                           }}
+                           className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                           role="menuitem"
+                        >
+                           <IconLogout className="w-5 h-5 mr-3" />
+                           <span>Logout</span>
+                        </button>
                      </div>
                   </div>
                )}
