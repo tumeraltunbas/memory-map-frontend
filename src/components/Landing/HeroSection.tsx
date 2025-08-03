@@ -1,8 +1,13 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../stores/store';
 
 export const HeroSection = () => {
    const navigate = useNavigate();
+   const isAuthenticated = useSelector(
+      (state: RootState) => state.user.isAuthenticated
+   );
    return (
       <section className="min-h-screen bg-[#FAFAFA] relative overflow-hidden">
          {/* Background Gradient Blur */}
@@ -31,7 +36,9 @@ export const HeroSection = () => {
 
                   <div className="flex flex-col sm:flex-row gap-4">
                      <motion.button
-                        onClick={() => navigate('/map')}
+                        onClick={() =>
+                           navigate(isAuthenticated ? '/map' : '/login')
+                        }
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="bg-[#9E7B9B] text-white px-8 py-4 rounded-lg text-lg font-medium 

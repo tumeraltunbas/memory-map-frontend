@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../stores/slices/userSlice';
+import { authAPI } from '../../services/api';
 
 export const Header = () => {
    const navigate = useNavigate();
@@ -59,6 +60,7 @@ export const Header = () => {
    };
 
    const handleLogout = () => {
+      authAPI.logout();
       dispatch(logout());
       navigate('/');
    };

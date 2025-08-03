@@ -4,6 +4,8 @@ import { Landing } from './components/Landing';
 import { MapLayout } from './components/MapLayout';
 import { Settings } from './components/Settings';
 import { Profile } from './components/Profile';
+import { Login } from './components/Auth/Login';
+import { Register } from './components/Auth/Register';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -11,6 +13,10 @@ function App() {
       <BrowserRouter>
          <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Protected Routes */}
             <Route
                path="/map"
                element={
@@ -35,6 +41,7 @@ function App() {
                   </ProtectedRoute>
                }
             />
+
             {/* Redirect any unknown routes to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
          </Routes>
