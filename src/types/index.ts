@@ -1,9 +1,28 @@
+export interface GeoLocation {
+   x: number;
+   y: number;
+}
+
 export interface Markdown {
-   id: string;
-   content: string;
+   markdownId: string;
+   title: string;
+   geoLocation: GeoLocation;
    photos: string[];
-   createdAt: string;
-   updatedAt: string;
+   notes: string[];
+   createdAt: Date;
+   updatedAt: Date;
+}
+
+export interface MarkdownNote {
+   markdownNoteId: string;
+   text: string;
+   markdownId: string;
+}
+
+export interface MarkdownPhoto {
+   markdownPhotoId: string;
+   url: string;
+   markdownId: string;
 }
 
 export interface User {

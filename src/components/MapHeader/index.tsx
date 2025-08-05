@@ -12,6 +12,14 @@ import { logout } from '../../stores/slices/userSlice';
 import { authAPI } from '../../services/api';
 import { useCursor } from '../../contexts/CursorContext';
 
+// Header visibility state
+export const setHeaderVisibility = (visible: boolean) => {
+   const header = document.querySelector('header');
+   if (header) {
+      header.style.display = visible ? 'flex' : 'none';
+   }
+};
+
 export const MapHeader = () => {
    const navigate = useNavigate();
    const dispatch = useDispatch();
@@ -81,7 +89,7 @@ export const MapHeader = () => {
    };
 
    return (
-      <header className="p-3 flex justify-between items-center">
+      <header className="fixed top-0 left-0 right-0 p-3 flex justify-between items-center z-[100] bg-transparent">
          <div className="flex-1" /> {/* Spacer */}
          <div className="flex gap-3">
             <div className="relative" ref={mapToolsRef}>
@@ -110,7 +118,7 @@ export const MapHeader = () => {
                </button>
 
                {openMapTools && (
-                  <div className="absolute right-0 mt-2 min-w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transition-all duration-200 ease-out">
+                  <div className="absolute right-0 mt-2 min-w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-[101] transition-all duration-200 ease-out">
                      <ul
                         className="py-1"
                         role="menu"
@@ -139,7 +147,7 @@ export const MapHeader = () => {
                </button>
 
                {openProfile && (
-                  <div className="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                  <div className="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-[101]">
                      <div
                         className="py-1"
                         role="menu"

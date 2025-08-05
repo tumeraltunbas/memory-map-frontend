@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../stores/store';
-import type { Markdown } from '../../types';
+
 import { AccountLayout } from '../AccountLayout';
 
 export const Profile = () => {

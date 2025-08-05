@@ -1,10 +1,22 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import mapboxgl, { Map as MapboxMap } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useCursor } from '../../contexts/CursorContext';
-import { addMarkdown } from '../../stores/slices/markdownsSlice';
+import type { MarkdownResponse } from '../../services/markdownApi';
+import {
+   addMarkdown,
+   setLoading,
+   setError,
+   setMarkdowns,
+   updateMarkdown,
+} from '../../stores/slices/markdownsSlice';
+import { markdownAPI } from '../../services/markdownApi';
+
+import { PhotoModal } from '../Modals/PhotoModal';
+import { MemoryModal } from '../Modals/MemoryModal';
+import { ViewMarkdownModal } from '../Modals/ViewMarkdownModal';
 import '../../styles/marker.css';
 
 // Mapbox token'ı ayarla
@@ -13,6 +25,12 @@ mapboxgl.accessToken = import.meta.env.VITE_MAP_BOX_ACCESS_KEY || '';
 export const Map = () => {
    const dispatch = useDispatch();
    const { cursorType } = useCursor();
+
+   // Modal states
+   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+   const [activeMarkerId, setActiveMarkerId] = useState<string | null>(null);
 
    // Map container için ref
    const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -35,7 +53,7 @@ export const Map = () => {
 
    // Map click handler
    const handleMapClick = useCallback(
-      (event: mapboxgl.MapMouseEvent) => {
+      async (event: mapboxgl.MapMouseEvent) => {
          if (cursorType !== 'location' || !mapInstanceRef.current) return;
 
          const { lngLat } = event;
@@ -63,6 +81,15 @@ export const Map = () => {
             </svg>
          `;
 
+         // Add click handler to marker element
+         markerElement.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent map click
+            setActiveMarkerId(markerId);
+            setIsViewModalOpen(true);
+         });
+
+         // No popup needed, just add the marker
+
          // Add marker to map with fixed position
          const marker = new mapboxgl.Marker({
             element: markerElement,
@@ -76,15 +103,38 @@ export const Map = () => {
          // Store marker reference
          markersRef.current[markerId] = marker;
 
-         // Add marker to Redux store
-         dispatch(
-            addMarkdown({
-               id: markerId,
-               latitude: lngLat.lat,
-               longitude: lngLat.lng,
-               createdAt: new Date().toISOString(),
-            })
-         );
+         // Create markdown in backend and add to Redux store
+         dispatch(setLoading(true));
+         try {
+            const response = await markdownAPI.createMarkdown({
+               title: `Memory at ${new Date().toLocaleString()}`,
+               coordinates: [lngLat.lat, lngLat.lng], // [x, y] formatında gönderiyoruz
+            });
+
+            dispatch(
+               addMarkdown({
+                  markdownId: response.markdownId,
+                  title: `Memory at ${new Date().toLocaleString()}`,
+                  geoLocation: { x: lngLat.lat, y: lngLat.lng },
+                  photos: [],
+                  notes: [],
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+               })
+            );
+         } catch (error) {
+            console.error('Error creating markdown:', error);
+            dispatch(
+               setError(
+                  error instanceof Error
+                     ? error.message
+                     : 'Failed to create markdown'
+               )
+            );
+            // Remove marker from map if creation fails
+            marker.remove();
+            delete markersRef.current[markerId];
+         }
       },
       [cursorType, dispatch]
    );
@@ -102,7 +152,7 @@ export const Map = () => {
       };
    }, [handleMapClick]);
 
-   // Initialize map
+   // Initialize map and load markdowns
    useEffect(() => {
       if (!mapContainerRef.current) return; // container yoksa çık
       if (mapInstanceRef.current) return; // map zaten oluşturulmuşsa çık
@@ -121,6 +171,66 @@ export const Map = () => {
       // Map instance'ını ref'e kaydet
       mapInstanceRef.current = map;
 
+      // Load existing markdowns
+      const loadMarkdowns = async () => {
+         dispatch(setLoading(true));
+         try {
+            const response = await markdownAPI.getAllMarkdowns();
+
+            // Add markers for each markdown
+            response.markdowns.forEach((markdown: MarkdownResponse) => {
+               const { x, y } = markdown.geoLocation;
+               const markerId = markdown.markdownId;
+
+               // Create marker element
+               const markerElement = document.createElement('div');
+               markerElement.className = 'marker';
+               markerElement.innerHTML = `
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
+                           fill="#9E7B9B"
+                           stroke="#9E7B9B"/>
+                  </svg>
+               `;
+
+               // Add click handler to marker element
+               markerElement.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  setActiveMarkerId(markerId);
+                  setIsViewModalOpen(true);
+               });
+
+               // Add marker to map
+               const marker = new mapboxgl.Marker({
+                  element: markerElement,
+                  pitchAlignment: 'viewport',
+                  rotationAlignment: 'viewport',
+                  draggable: false,
+               })
+                  .setLngLat([y, x])
+                  .addTo(map);
+
+               // Store marker reference
+               markersRef.current[markerId] = marker;
+            });
+
+            // Update Redux store
+            dispatch(setMarkdowns(response.markdowns));
+         } catch (error) {
+            console.error('Error loading markdowns:', error);
+            dispatch(
+               setError(
+                  error instanceof Error
+                     ? error.message
+                     : 'Failed to load markdowns'
+               )
+            );
+         }
+      };
+
+      // Load markdowns when map is initialized
+      loadMarkdowns();
+
       // Cleanup function
       return () => {
          // Marker'ları temizle
@@ -130,18 +240,127 @@ export const Map = () => {
          // Ref'i temizle
          mapInstanceRef.current = null;
       };
-   }, []); // Boş dependency array ile sadece bir kere initialize et
+   }, [dispatch]); // dispatch'i dependency array'e ekledik
 
    // Debug için cursor type'ı konsola yazdır
    useEffect(() => {
       console.log('Current cursor type:', cursorType);
    }, [cursorType]);
 
+   const handlePhotoSave = async (files: File[]) => {
+      if (!activeMarkerId || !files.length) return;
+
+      dispatch(setLoading(true));
+      try {
+         // Fotoğrafları yükle
+         await markdownAPI.uploadMarkdownPhotos(activeMarkerId, files);
+
+         // Güncel markdown'ı al
+         const updatedMarkdown =
+            await markdownAPI.getSingleMarkdown(activeMarkerId);
+
+         // Redux store'u güncelle
+         dispatch(
+            updateMarkdown({
+               ...updatedMarkdown,
+               createdAt: new Date(updatedMarkdown.createdAt),
+               updatedAt: new Date(updatedMarkdown.updatedAt),
+            })
+         );
+
+         setIsPhotoModalOpen(false);
+         setActiveMarkerId(null);
+      } catch (error) {
+         console.error('Error uploading photos:', error);
+         dispatch(
+            setError(
+               error instanceof Error
+                  ? error.message
+                  : 'Failed to upload photos'
+            )
+         );
+      }
+   };
+
+   const handleMemorySave = async (text: string) => {
+      if (!activeMarkerId) return;
+
+      dispatch(setLoading(true));
+      try {
+         await markdownAPI.createMarkdownNote({
+            markdownId: activeMarkerId,
+            text: text,
+         });
+
+         // Güncel markdown'ı al
+         const updatedMarkdown =
+            await markdownAPI.getSingleMarkdown(activeMarkerId);
+
+         // Redux store'u güncelle
+         dispatch(
+            updateMarkdown({
+               ...updatedMarkdown,
+               createdAt: new Date(updatedMarkdown.createdAt),
+               updatedAt: new Date(updatedMarkdown.updatedAt),
+            })
+         );
+
+         setIsMemoryModalOpen(false);
+         setActiveMarkerId(null);
+      } catch (error) {
+         console.error('Error saving note:', error);
+         dispatch(
+            setError(
+               error instanceof Error ? error.message : 'Failed to save note'
+            )
+         );
+      }
+   };
+
    return (
-      <div
-         ref={mapContainerRef}
-         className={`h-screen w-screen cursor-${cursorType}`}
-         style={{ position: 'relative' }}
-      />
+      <>
+         <div
+            ref={mapContainerRef}
+            className={`h-screen w-screen cursor-${cursorType}`}
+            style={{ position: 'relative' }}
+         />
+
+         <PhotoModal
+            isOpen={isPhotoModalOpen}
+            onClose={() => {
+               setIsPhotoModalOpen(false);
+               setActiveMarkerId(null);
+            }}
+            onSave={handlePhotoSave}
+            markerId={activeMarkerId || ''}
+         />
+
+         <MemoryModal
+            isOpen={isMemoryModalOpen}
+            onClose={() => {
+               setIsMemoryModalOpen(false);
+               setActiveMarkerId(null);
+            }}
+            onSave={handleMemorySave}
+            markerId={activeMarkerId || ''}
+         />
+
+         <ViewMarkdownModal
+            isOpen={isViewModalOpen}
+            onClose={() => {
+               setIsViewModalOpen(false);
+               setActiveMarkerId(null);
+            }}
+            markdownId={activeMarkerId || ''}
+            onAddPhoto={() => {
+               setIsViewModalOpen(false);
+               setIsPhotoModalOpen(true);
+            }}
+            onAddNote={() => {
+               setIsViewModalOpen(false);
+               setIsMemoryModalOpen(true);
+            }}
+         />
+      </>
    );
 };
