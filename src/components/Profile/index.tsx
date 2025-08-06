@@ -1,10 +1,46 @@
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../stores/store';
+import { setUser, setLoading } from '../../stores/slices/userSlice';
+import { authAPI } from '../../services/api';
 
 import { AccountLayout } from '../AccountLayout';
 
 export const Profile = () => {
+   const dispatch = useDispatch();
    const user = useSelector((state: RootState) => state.user.user);
+   const isLoading = useSelector((state: RootState) => state.user.isLoading);
+
+   // Profile sayfası yüklendiğinde kullanıcı bilgilerini getir
+   useEffect(() => {
+      const fetchUserProfile = async () => {
+         dispatch(setLoading(true));
+         try {
+            const userData = await authAPI.getCurrentUser();
+            dispatch(setUser(userData));
+         } catch (error) {
+            console.error('Error fetching user profile:', error);
+            dispatch(setLoading(false));
+         }
+      };
+
+      fetchUserProfile();
+   }, [dispatch]);
+
+   if (isLoading) {
+      return (
+         <AccountLayout>
+            <div className="p-6">
+               <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9E7B9B] mx-auto"></div>
+                     <p className="mt-4 text-gray-500">Loading profile...</p>
+                  </div>
+               </div>
+            </div>
+         </AccountLayout>
+      );
+   }
 
    return (
       <AccountLayout>

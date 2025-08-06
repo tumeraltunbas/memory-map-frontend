@@ -5,6 +5,7 @@ import type { User } from '../../types';
 interface UserState {
    user: User;
    isAuthenticated: boolean;
+   isLoading: boolean;
 }
 
 const initialState: UserState = {
@@ -17,6 +18,7 @@ const initialState: UserState = {
       markdowns: [],
    },
    isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
+   isLoading: false,
 };
 
 const userSlice = createSlice({
@@ -26,14 +28,19 @@ const userSlice = createSlice({
       setUser(state, action) {
          state.user = { ...action.payload };
          state.isAuthenticated = true;
+         state.isLoading = false;
          localStorage.setItem('isAuthenticated', 'true');
+      },
+      setLoading(state, action) {
+         state.isLoading = action.payload;
       },
       logout(state) {
          state.user = { ...initialState.user };
          state.isAuthenticated = false;
+         state.isLoading = false;
       },
    },
 });
 
-export const { setUser, logout } = userSlice.actions;
+export const { setUser, setLoading, logout } = userSlice.actions;
 export default userSlice.reducer;
