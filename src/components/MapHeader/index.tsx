@@ -1,10 +1,10 @@
 import {
    IconHandStop,
-   IconMapPin,
    IconUser,
    IconSettings,
    IconLogout,
 } from '@tabler/icons-react';
+import { IconMapPin } from '../Icons/MapPin';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -28,6 +28,7 @@ export const MapHeader = () => {
    const [activeMapTool, setActiveMapTool] = useState<'hand' | 'location'>(
       'hand'
    );
+   const [searchQuery, setSearchQuery] = useState('');
    const { setCursorType } = useCursor();
    const mapToolsRef = useRef<HTMLDivElement>(null);
    const profileRef = useRef<HTMLDivElement>(null);
@@ -60,7 +61,6 @@ export const MapHeader = () => {
 
    const handleToolChange = () => {
       const newTool = activeMapTool === 'hand' ? 'location' : 'hand';
-      console.log('Changing tool to:', newTool); // Debug log
       setActiveMapTool(newTool);
       setCursorType(newTool);
       setOpenMapTools(false);
@@ -89,8 +89,33 @@ export const MapHeader = () => {
    };
 
    return (
-      <header className="fixed top-0 left-0 right-0 p-3 flex justify-between items-center z-[100] bg-transparent">
-         <div className="flex-1" /> {/* Spacer */}
+      <header className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-[100] bg-transparent">
+         <div className="w-64">
+            <div className="relative">
+               <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search locations..."
+                  className="w-full pl-8 pr-3 py-1.5 rounded-full border border-gray-300 shadow-sm bg-white text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               />
+               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                     className="h-4 w-4 text-gray-400"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                  >
+                     <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                     />
+                  </svg>
+               </div>
+            </div>
+         </div>
          <div className="flex gap-3">
             <div className="relative" ref={mapToolsRef}>
                <button

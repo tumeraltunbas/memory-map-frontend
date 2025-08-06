@@ -18,6 +18,7 @@ import { PhotoModal } from '../Modals/PhotoModal';
 import { MemoryModal } from '../Modals/MemoryModal';
 import { ViewMarkdownModal } from '../Modals/ViewMarkdownModal';
 import '../../styles/marker.css';
+import LocationMarker from '../../../public/cursors/location.svg';
 
 // Mapbox token'ı ayarla
 mapboxgl.accessToken = import.meta.env.VITE_MAP_BOX_ACCESS_KEY || '';
@@ -73,13 +74,12 @@ export const Map = () => {
          // Create marker element
          const markerElement = document.createElement('div');
          markerElement.className = 'marker';
-         markerElement.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-                     fill="#9E7B9B"
-                     stroke="#9E7B9B"/>
-            </svg>
-         `;
+
+         // Create SVG element
+         const img = document.createElement('img');
+         img.src = LocationMarker;
+         // Boyut artık CSS'ten kontrol ediliyor
+         markerElement.appendChild(img);
 
          // Add click handler to marker element
          markerElement.addEventListener('click', (e) => {
@@ -93,11 +93,10 @@ export const Map = () => {
          // Add marker to map with fixed position
          const marker = new mapboxgl.Marker({
             element: markerElement,
-            pitchAlignment: 'viewport',
-            rotationAlignment: 'viewport',
+            anchor: 'bottom',
             draggable: false,
          })
-            .setLngLat(lngLat)
+            .setLngLat([lngLat.lng, lngLat.lat])
             .addTo(mapInstanceRef.current);
 
          // Store marker reference
@@ -108,14 +107,14 @@ export const Map = () => {
          try {
             const response = await markdownAPI.createMarkdown({
                title: `Memory at ${new Date().toLocaleString()}`,
-               coordinates: [lngLat.lat, lngLat.lng], // [x, y] formatında gönderiyoruz
+               coordinates: [lngLat.lng, lngLat.lat], // [lng, lat] formatında gönderiyoruz
             });
 
             dispatch(
                addMarkdown({
                   markdownId: response.markdownId,
                   title: `Memory at ${new Date().toLocaleString()}`,
-                  geoLocation: { x: lngLat.lat, y: lngLat.lng },
+                  geoLocation: { x: lngLat.lng, y: lngLat.lat },
                   photos: [],
                   notes: [],
                   createdAt: new Date(),
@@ -179,19 +178,17 @@ export const Map = () => {
 
             // Add markers for each markdown
             response.markdowns.forEach((markdown: MarkdownResponse) => {
-               const { x, y } = markdown.geoLocation;
                const markerId = markdown.markdownId;
 
                // Create marker element
                const markerElement = document.createElement('div');
                markerElement.className = 'marker';
-               markerElement.innerHTML = `
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-                           fill="#9E7B9B"
-                           stroke="#9E7B9B"/>
-                  </svg>
-               `;
+
+               // Create SVG element
+               const img = document.createElement('img');
+               img.src = LocationMarker;
+               img.className = 'w-6 h-6';
+               markerElement.appendChild(img);
 
                // Add click handler to marker element
                markerElement.addEventListener('click', (e) => {
@@ -203,11 +200,10 @@ export const Map = () => {
                // Add marker to map
                const marker = new mapboxgl.Marker({
                   element: markerElement,
-                  pitchAlignment: 'viewport',
-                  rotationAlignment: 'viewport',
+                  anchor: 'bottom',
                   draggable: false,
                })
-                  .setLngLat([y, x])
+                  .setLngLat([markdown.geoLocation.x, markdown.geoLocation.y])
                   .addTo(map);
 
                // Store marker reference
@@ -322,7 +318,14 @@ export const Map = () => {
          <div
             ref={mapContainerRef}
             className={`h-screen w-screen cursor-${cursorType}`}
-            style={{ position: 'relative' }}
+            style={{
+               position: 'fixed',
+               top: 0,
+               left: 0,
+               right: 0,
+               bottom: 0,
+               overflow: 'hidden',
+            }}
          />
 
          <PhotoModal

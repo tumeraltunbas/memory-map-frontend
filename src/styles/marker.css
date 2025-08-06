@@ -1,6 +1,10 @@
 .marker {
    cursor: pointer;
-   transition: transform 0.2s ease;
+}
+
+.marker img {
+   width: 32px; /* İstediğiniz boyutu buradan ayarlayabilirsiniz */
+   height: 32px;
 }
 
 .marker:hover {
