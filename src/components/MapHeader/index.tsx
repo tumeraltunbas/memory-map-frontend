@@ -5,12 +5,23 @@ import {
    IconLogout,
 } from '@tabler/icons-react';
 import { IconMapPin } from '../Icons/MapPin';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../stores/slices/userSlice';
 import { authAPI } from '../../services/api';
 import { useCursor } from '../../contexts/CursorContext';
+import { mapboxSearchAPI as searchAPI } from '../../services/mapboxSearchApi';
+
+export interface MapLocation {
+   longitude: number;
+   latitude: number;
+}
+
+interface MapHeaderProps {
+   onLocationSelect?: (location: MapLocation) => void;
+}
 
 // Header visibility state
 export const setHeaderVisibility = (visible: boolean) => {
@@ -20,7 +31,7 @@ export const setHeaderVisibility = (visible: boolean) => {
    }
 };
 
-export const MapHeader = () => {
+export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
    const navigate = useNavigate();
    const dispatch = useDispatch();
    const [openMapTools, setOpenMapTools] = useState<boolean>(false);
@@ -29,9 +40,32 @@ export const MapHeader = () => {
       'hand'
    );
    const [searchQuery, setSearchQuery] = useState('');
+   const [searchResults, setSearchResults] = useState<any[]>([]);
+   const [isLoading, setIsLoading] = useState(false);
+   const searchAbortController = useRef<AbortController | null>(null);
+   const sessionToken = useRef<string>(uuidv4()); // Yeni oturum için UUID oluştur
    const { setCursorType } = useCursor();
    const mapToolsRef = useRef<HTMLDivElement>(null);
    const profileRef = useRef<HTMLDivElement>(null);
+
+   // Sayfa görünürlüğü değiştiğinde yeni session token oluştur
+   useEffect(() => {
+      const handleVisibilityChange = () => {
+         if (document.visibilityState === 'visible') {
+            sessionToken.current = uuidv4(); // Yeni session token oluştur
+            setSearchResults([]); // Önceki sonuçları temizle
+            setSearchQuery(''); // Arama sorgusunu temizle
+         }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => {
+         document.removeEventListener(
+            'visibilitychange',
+            handleVisibilityChange
+         );
+      };
+   }, []);
 
    // Set initial cursor type
    useEffect(() => {
@@ -82,6 +116,46 @@ export const MapHeader = () => {
       );
    };
 
+   const handleSearch = useCallback(async (query: string) => {
+      // Önceki isteği iptal et
+      if (searchAbortController.current) {
+         searchAbortController.current.abort();
+      }
+
+      // Yeni istek için controller oluştur
+      searchAbortController.current = new AbortController();
+
+      if (!query.trim()) {
+         setSearchResults([]);
+         setIsLoading(false);
+         return;
+      }
+
+      setIsLoading(true);
+      try {
+         const results = await searchAPI.suggest(
+            query,
+            sessionToken.current,
+            searchAbortController.current.signal
+         );
+         setSearchResults(results);
+      } catch (error) {
+         console.error('Search error:', error);
+         setSearchResults([]);
+      } finally {
+         setIsLoading(false);
+      }
+   }, []);
+
+   // Debounce search
+   useEffect(() => {
+      const timer = setTimeout(() => {
+         handleSearch(searchQuery);
+      }, 300);
+
+      return () => clearTimeout(timer);
+   }, [searchQuery, handleSearch]);
+
    const handleLogout = () => {
       authAPI.logout();
       dispatch(logout());
@@ -114,6 +188,91 @@ export const MapHeader = () => {
                      />
                   </svg>
                </div>
+               {(searchResults.length > 0 || isLoading) && (
+                  <div className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
+                     {isLoading ? (
+                        <div className="px-4 py-2 text-sm text-gray-500">
+                           Searching...
+                        </div>
+                     ) : (
+                        <ul>
+                           {searchResults.map((result, index) => (
+                              <li
+                                 key={result.mapbox_id}
+                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                 onClick={async () => {
+                                    try {
+                                       const coords = await searchAPI.retrieve(
+                                          result.mapbox_id,
+                                          sessionToken.current
+                                       );
+
+                                       if (onLocationSelect) {
+                                          const [longitude, latitude] = coords;
+
+                                          try {
+                                             onLocationSelect({
+                                                longitude,
+                                                latitude,
+                                             });
+                                          } catch (error) {
+                                             console.error(
+                                                'Error in onLocationSelect:',
+                                                error
+                                             );
+                                          }
+                                       }
+                                    } catch (error) {
+                                       console.error(
+                                          'Error retrieving coordinates:',
+                                          error
+                                       );
+                                    } finally {
+                                       setSearchResults([]);
+                                       setSearchQuery('');
+                                    }
+                                 }}
+                              >
+                                 <div className="flex items-center gap-2">
+                                    <div className="flex-1">
+                                       <div className="font-medium">
+                                          {result.name}
+                                       </div>
+                                       <div className="text-gray-500 text-xs">
+                                          {result.full_address ||
+                                             result.place_formatted}
+                                       </div>
+                                    </div>
+                                    {result.poi_category &&
+                                       result.poi_category.length > 0 && (
+                                          <div className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
+                                             {result.poi_category[0]}
+                                          </div>
+                                       )}
+                                 </div>
+                                 <div className="mt-1 text-xs text-gray-400 flex gap-2">
+                                    {result.feature_type && (
+                                       <span className="capitalize">
+                                          {result.feature_type}
+                                       </span>
+                                    )}
+                                    {result.context?.place?.name && (
+                                       <span>
+                                          • {result.context.place.name}
+                                       </span>
+                                    )}
+                                    {result.context?.country?.name && (
+                                       <span>
+                                          • {result.context.country.name}
+                                       </span>
+                                    )}
+                                 </div>
+                              </li>
+                           ))}
+                        </ul>
+                     )}
+                  </div>
+               )}
             </div>
          </div>
          <div className="flex gap-3">

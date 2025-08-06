@@ -3,6 +3,8 @@ import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import mapboxgl, { Map as MapboxMap } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+
+import { MapHeader, type MapLocation } from '../MapHeader';
 import { useCursor } from '../../contexts/CursorContext';
 import type { MarkdownResponse } from '../../services/markdownApi';
 import {
@@ -23,7 +25,11 @@ import LocationMarker from '../../../public/cursors/location.svg';
 // Mapbox token'ı ayarla
 mapboxgl.accessToken = import.meta.env.VITE_MAP_BOX_ACCESS_KEY || '';
 
-export const Map = () => {
+interface MapProps {
+   targetLocation: MapLocation | null;
+}
+
+export const Map = ({ targetLocation }: MapProps) => {
    const dispatch = useDispatch();
    const { cursorType } = useCursor();
 
@@ -37,6 +43,21 @@ export const Map = () => {
    const mapContainerRef = useRef<HTMLDivElement>(null);
    // Map instance'ı için ref
    const mapInstanceRef = useRef<MapboxMap | null>(null);
+
+   // targetLocation değiştiğinde haritayı hareket ettir
+   useEffect(() => {
+      if (!targetLocation || !mapInstanceRef.current) return;
+
+      try {
+         mapInstanceRef.current.flyTo({
+            center: [targetLocation.longitude, targetLocation.latitude],
+            zoom: 15,
+            duration: 1500,
+         });
+      } catch (error) {
+         console.error('Error flying to location:', error);
+      }
+   }, [targetLocation]);
    // Marker'lar için ref
    const markersRef = useRef<{ [key: string]: mapboxgl.Marker }>({});
 
@@ -156,7 +177,7 @@ export const Map = () => {
       if (!mapContainerRef.current) return; // container yoksa çık
       if (mapInstanceRef.current) return; // map zaten oluşturulmuşsa çık
 
-      const map = new MapboxMap({
+      const map = new mapboxgl.Map({
          container: mapContainerRef.current,
          config: {
             basemap: {
@@ -165,10 +186,18 @@ export const Map = () => {
                font: 'Inter',
             },
          },
+
+         zoom: 9,
       });
 
-      // Map instance'ını ref'e kaydet
-      mapInstanceRef.current = map;
+      // Map yüklendiğinde
+      map.on('load', () => {
+         // Map instance'ını ref'e kaydet
+         mapInstanceRef.current = map;
+      });
+
+      // Style yüklendiğinde
+      map.on('style.load', () => {});
 
       // Load existing markdowns
       const loadMarkdowns = async () => {
@@ -239,9 +268,7 @@ export const Map = () => {
    }, [dispatch]); // dispatch'i dependency array'e ekledik
 
    // Debug için cursor type'ı konsola yazdır
-   useEffect(() => {
-      console.log('Current cursor type:', cursorType);
-   }, [cursorType]);
+   useEffect(() => {}, [cursorType]);
 
    const handlePhotoSave = async (files: File[]) => {
       if (!activeMarkerId || !files.length) return;
