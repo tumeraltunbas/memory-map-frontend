@@ -1,10 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
 import mapboxgl, { Map as MapboxMap } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { MapHeader, type MapLocation } from '../MapHeader';
+import type { MapLocation } from '../MapHeader';
 import { useCursor } from '../../contexts/CursorContext';
 import type { MarkdownResponse } from '../../services/markdownApi';
 import {
@@ -20,6 +19,7 @@ import { PhotoModal } from '../Modals/PhotoModal';
 import { MemoryModal } from '../Modals/MemoryModal';
 import { ViewMarkdownModal } from '../Modals/ViewMarkdownModal';
 import '../../styles/marker.css';
+import '../../styles/cursor.css';
 import LocationMarker from '../../../public/cursors/location.svg';
 
 // Mapbox token'ı ayarla
@@ -90,58 +90,80 @@ export const Map = ({ targetLocation }: MapProps) => {
             return;
          }
 
-         const markerId = uuidv4();
-
-         // Create marker element
-         const markerElement = document.createElement('div');
-         markerElement.className = 'marker';
-
-         // Create SVG element
-         const img = document.createElement('img');
-         img.src = LocationMarker;
-         // Boyut artık CSS'ten kontrol ediliyor
-         markerElement.appendChild(img);
-
-         // Add click handler to marker element
-         markerElement.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent map click
-            setActiveMarkerId(markerId);
-            setIsViewModalOpen(true);
-         });
-
-         // No popup needed, just add the marker
-
-         // Add marker to map with fixed position
-         const marker = new mapboxgl.Marker({
-            element: markerElement,
-            anchor: 'bottom',
-            draggable: false,
-         })
-            .setLngLat([lngLat.lng, lngLat.lat])
-            .addTo(mapInstanceRef.current);
-
-         // Store marker reference
-         markersRef.current[markerId] = marker;
-
-         // Create markdown in backend and add to Redux store
+         // Create markdown in backend first to get the real ID
          dispatch(setLoading(true));
          try {
-            const response = await markdownAPI.createMarkdown({
+            const createResponse = await markdownAPI.createMarkdown({
                title: `Memory at ${new Date().toLocaleString()}`,
                coordinates: [lngLat.lng, lngLat.lat], // [lng, lat] formatında gönderiyoruz
             });
 
+            const markdownId = createResponse.markdownId;
+
+            // Create marker element
+            const markerElement = document.createElement('div');
+            markerElement.className = 'marker';
+
+            // Create SVG element
+            const img = document.createElement('img');
+            img.src = LocationMarker;
+            // Boyut artık CSS'ten kontrol ediliyor
+            markerElement.appendChild(img);
+
+            // Add click handler to marker element with the real markdown ID
+            markerElement.addEventListener('click', async (e) => {
+               e.stopPropagation(); // Prevent map click
+               try {
+                  const markdownDetails =
+                     await markdownAPI.getSingleMarkdown(markdownId);
+                  dispatch(
+                     addMarkdown({
+                        ...markdownDetails,
+                        createdAt: new Date(markdownDetails.createdAt),
+                        updatedAt: new Date(markdownDetails.updatedAt),
+                     })
+                  );
+                  setActiveMarkerId(markdownId);
+                  setIsViewModalOpen(true);
+               } catch (error) {
+                  console.error('Error fetching markdown details:', error);
+                  dispatch(
+                     setError(
+                        error instanceof Error
+                           ? error.message
+                           : 'Failed to fetch markdown details'
+                     )
+                  );
+               }
+            });
+
+            // Add marker to map with fixed position
+            const marker = new mapboxgl.Marker({
+               element: markerElement,
+               anchor: 'bottom',
+               draggable: false,
+            })
+               .setLngLat([lngLat.lng, lngLat.lat])
+               .addTo(mapInstanceRef.current);
+
+            // Store marker reference with the real markdown ID
+            markersRef.current[markdownId] = marker;
+
+            // Get markdown details and update store
+            const markdownDetails =
+               await markdownAPI.getSingleMarkdown(markdownId);
+
             dispatch(
                addMarkdown({
-                  markdownId: response.markdownId,
-                  title: `Memory at ${new Date().toLocaleString()}`,
-                  geoLocation: { x: lngLat.lng, y: lngLat.lat },
-                  photos: [],
-                  notes: [],
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
+                  ...markdownDetails,
+                  createdAt: new Date(markdownDetails.createdAt),
+                  updatedAt: new Date(markdownDetails.updatedAt),
                })
             );
+
+            // Automatically open ViewMarkdownModal for the new markdown
+            setActiveMarkerId(markdownId);
+            setIsViewModalOpen(true);
          } catch (error) {
             console.error('Error creating markdown:', error);
             dispatch(
@@ -151,9 +173,7 @@ export const Map = ({ targetLocation }: MapProps) => {
                      : 'Failed to create markdown'
                )
             );
-            // Remove marker from map if creation fails
-            marker.remove();
-            delete markersRef.current[markerId];
+            // No need to remove marker as it's created after successful API call
          }
       },
       [cursorType, dispatch]
@@ -220,10 +240,30 @@ export const Map = ({ targetLocation }: MapProps) => {
                markerElement.appendChild(img);
 
                // Add click handler to marker element
-               markerElement.addEventListener('click', (e) => {
+               markerElement.addEventListener('click', async (e) => {
                   e.stopPropagation();
-                  setActiveMarkerId(markerId);
-                  setIsViewModalOpen(true);
+                  try {
+                     const markdownDetails =
+                        await markdownAPI.getSingleMarkdown(markerId);
+                     dispatch(
+                        addMarkdown({
+                           ...markdownDetails,
+                           createdAt: new Date(markdownDetails.createdAt),
+                           updatedAt: new Date(markdownDetails.updatedAt),
+                        })
+                     );
+                     setActiveMarkerId(markerId);
+                     setIsViewModalOpen(true);
+                  } catch (error) {
+                     console.error('Error fetching markdown details:', error);
+                     dispatch(
+                        setError(
+                           error instanceof Error
+                              ? error.message
+                              : 'Failed to fetch markdown details'
+                        )
+                     );
+                  }
                });
 
                // Add marker to map
@@ -267,8 +307,31 @@ export const Map = ({ targetLocation }: MapProps) => {
       };
    }, [dispatch]); // dispatch'i dependency array'e ekledik
 
-   // Debug için cursor type'ı konsola yazdır
-   useEffect(() => {}, [cursorType]);
+   // Cursor type değiştiğinde map container'ın cursor'ını güncelle
+   useEffect(() => {
+      if (!mapContainerRef.current || !mapInstanceRef.current) return;
+
+      // Önce tüm cursor class'larını kaldır
+      mapContainerRef.current.classList.remove(
+         'cursor-hand',
+         'cursor-location',
+         'cursor-default'
+      );
+
+      // Yeni cursor class'ını ekle
+      mapContainerRef.current.classList.add(`cursor-${cursorType}`);
+
+      // Mapbox canvas elementinin cursor'ını güncelle
+      const canvas = mapInstanceRef.current.getCanvas();
+      if (canvas) {
+         canvas.style.cursor =
+            cursorType === 'hand'
+               ? 'grab'
+               : cursorType === 'location'
+                 ? 'crosshair'
+                 : 'default';
+      }
+   }, [cursorType]);
 
    const handlePhotoSave = async (files: File[]) => {
       if (!activeMarkerId || !files.length) return;
@@ -352,6 +415,7 @@ export const Map = ({ targetLocation }: MapProps) => {
                right: 0,
                bottom: 0,
                overflow: 'hidden',
+               cursor: `${cursorType === 'hand' ? 'grab' : cursorType === 'location' ? 'crosshair' : 'default'} !important`,
             }}
          />
 

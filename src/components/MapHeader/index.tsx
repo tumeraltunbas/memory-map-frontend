@@ -98,6 +98,9 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
       setActiveMapTool(newTool);
       setCursorType(newTool);
       setOpenMapTools(false);
+
+      // Debug için cursor değişimini konsola yazdır
+      console.log('Cursor changed to:', newTool);
    };
 
    const getMapToolIcon = () => {

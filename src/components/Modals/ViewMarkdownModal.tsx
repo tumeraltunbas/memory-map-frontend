@@ -108,7 +108,7 @@ export const ViewMarkdownModal = ({
                   <div className="flex items-center gap-2">
                      <button
                         onClick={onAddPhoto}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                        className="flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                         title="Add Photo"
                      >
                         <svg
@@ -124,10 +124,11 @@ export const ViewMarkdownModal = ({
                               d="M4 16l4-4a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                            />
                         </svg>
+                        <span className="text-sm font-medium">Add Photo</span>
                      </button>
                      <button
                         onClick={onAddNote}
-                        className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-full transition-all"
+                        className="flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
                         title="Add Note"
                      >
                         <svg
@@ -143,6 +144,7 @@ export const ViewMarkdownModal = ({
                               d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
                            />
                         </svg>
+                        <span className="text-sm font-medium">Add Note</span>
                      </button>
                      <button
                         onClick={onClose}
