@@ -6,7 +6,7 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
    return (
-      <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF7FB] via-[#F7ECF6] to-[#F3E7F2] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
          <div className="sm:mx-auto sm:w-full sm:max-w-md">
             <h1 className="text-3xl font-bold text-center text-[#2D3748] mb-2">
                Memory Map
@@ -18,7 +18,7 @@ export const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
          </div>
 
          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
+            <div className="bg-white/90 backdrop-blur-sm border border-gray-100 py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
                {children}
             </div>
          </div>

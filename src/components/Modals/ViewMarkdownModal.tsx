@@ -425,6 +425,50 @@ export const ViewMarkdownModal = ({
                   </div>
                )}
 
+               {/* Photos Empty State - keep photos area above notes even when empty */}
+               {markdown.photos.length === 0 && (
+                  <div className="mb-8">
+                     <h3 className="text-sm font-medium text-gray-500 mb-4">
+                        Photos
+                     </h3>
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {/* Empty photo tile - label triggers input */}
+                        <label className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-[#9E7B9B] transition-colors">
+                           <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                 const selected = Array.from(
+                                    e.target.files || []
+                                 );
+                                 uploadFiles(selected);
+                              }}
+                           />
+                           <div
+                              className="w-12 h-12 rounded-full bg-white shadow flex items-center justify-center text-gray-500 hover:text-[#9E7B9B] hover:shadow-md transition"
+                              title="Add Photos"
+                           >
+                              <svg
+                                 className="w-6 h-6"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                              >
+                                 <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4v16m8-8H4"
+                                 />
+                              </svg>
+                           </div>
+                        </label>
+                     </div>
+                  </div>
+               )}
+
                {/* Notes Section with add tile at top */}
                <div>
                   <div className="flex items-center justify-between mb-4">
@@ -650,50 +694,6 @@ export const ViewMarkdownModal = ({
                      </div>
                   )}
                </div>
-
-               {/* Empty State */}
-               {markdown.photos.length === 0 && (
-                  <div className="mb-8">
-                     <h3 className="text-sm font-medium text-gray-500 mb-4">
-                        Photos
-                     </h3>
-                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {/* Empty photo tile - label triggers input */}
-                        <label className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-[#9E7B9B] transition-colors">
-                           <input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              onChange={(e) => {
-                                 const selected = Array.from(
-                                    e.target.files || []
-                                 );
-                                 uploadFiles(selected);
-                              }}
-                           />
-                           <div
-                              className="w-12 h-12 rounded-full bg-white shadow flex items-center justify-center text-gray-500 hover:text-[#9E7B9B] hover:shadow-md transition"
-                              title="Add Photos"
-                           >
-                              <svg
-                                 className="w-6 h-6"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 viewBox="0 0 24 24"
-                              >
-                                 <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 4v16m8-8H4"
-                                 />
-                              </svg>
-                           </div>
-                        </label>
-                     </div>
-                  </div>
-               )}
 
                {/* Empty Notes handled by the Notes section add tile above */}
 
