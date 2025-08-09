@@ -71,6 +71,30 @@ export const ViewMarkdownModal = ({
       return () => window.removeEventListener('keydown', onKeyDown);
    }, [isOpen, onClose]);
 
+   // Blur and disable the map header while modal is open
+   useEffect(() => {
+      const header = document.querySelector('header') as HTMLElement | null;
+      if (!header) return;
+      if (isOpen) {
+         header.style.pointerEvents = 'none';
+         header.style.filter = 'blur(3px)';
+         header.style.opacity = '0.6';
+         header.setAttribute('aria-hidden', 'true');
+      } else {
+         header.style.pointerEvents = '';
+         header.style.filter = '';
+         header.style.opacity = '';
+         header.removeAttribute('aria-hidden');
+      }
+      return () => {
+         if (!header) return;
+         header.style.pointerEvents = '';
+         header.style.filter = '';
+         header.style.opacity = '';
+         header.removeAttribute('aria-hidden');
+      };
+   }, [isOpen]);
+
    useEffect(() => {
       if (!openMoreActions) return;
       const handleOutside = (e: MouseEvent) => {
