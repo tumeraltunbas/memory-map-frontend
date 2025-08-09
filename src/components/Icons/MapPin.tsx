@@ -1,11 +1,27 @@
 import React from 'react';
 
-export const IconMapPin = ({ className = '' }: { className?: string }) => (
+type IconMapPinProps = {
+   className?: string;
+   fill?: string;
+   stroke?: string;
+   strokeWidth?: number;
+   style?: React.CSSProperties;
+};
+
+export const IconMapPin = ({
+   className = '',
+   fill,
+   stroke,
+   strokeWidth,
+   style,
+}: IconMapPinProps) => (
    <svg
       viewBox="0 0 128 128"
       className={className}
-      fill="currentColor"
-      stroke="currentColor"
+      fill={fill ?? 'currentColor'}
+      stroke={stroke ?? 'currentColor'}
+      strokeWidth={strokeWidth}
+      style={style}
    >
       <path d="M68.63 59.34l-9.27-1.52s-.45 38.95-.06 43.57c0 .01 2.39 14.08 2.98 21.07c.07.87.8 1.55 1.68 1.55c.88 0 1.61-.67 1.69-1.55l2.99-21.07c-.02-6.35-.01-42.05-.01-42.05z" />
       <path d="M68.59 59.77s.04 5.9.04 7.37c0 1.47-1.31 3.83-4.7 3.83s-4.64-2.31-4.64-3.73s.01-7.45.01-7.45l9.29-.02z" />

@@ -163,7 +163,10 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
    };
 
    return (
-      <header className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-[100] bg-transparent">
+      <header
+         className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-[100] bg-transparent"
+         data-cursor-block="true"
+      >
          <div className="w-64">
             <div className="relative">
                <input
@@ -172,6 +175,7 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search locations..."
                   className="w-full pl-8 pr-3 py-1.5 rounded-full border border-gray-300 shadow-sm bg-white text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
+                  data-cursor-block="true"
                />
                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg
@@ -189,14 +193,17 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
                   </svg>
                </div>
                {(searchResults.length > 0 || isLoading) && (
-                  <div className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
+                  <div
+                     className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50"
+                     data-cursor-block="true"
+                  >
                      {isLoading ? (
                         <div className="px-4 py-2 text-sm text-gray-500">
                            Searching...
                         </div>
                      ) : (
                         <ul>
-                           {searchResults.map((result, index) => (
+                           {searchResults.map((result) => (
                               <li
                                  key={result.mapbox_id}
                                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
@@ -276,7 +283,11 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
             </div>
          </div>
          <div className="flex gap-3">
-            <div className="relative" ref={mapToolsRef}>
+            <div
+               className="relative"
+               ref={mapToolsRef}
+               data-cursor-block="true"
+            >
                <button
                   onClick={() => setOpenMapTools(!openMapTools)}
                   className="inline-flex items-center justify-center rounded-full border border-gray-300 shadow-sm p-3 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -302,7 +313,10 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
                </button>
 
                {openMapTools && (
-                  <div className="absolute right-0 mt-2 min-w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-[101] transition-all duration-200 ease-out">
+                  <div
+                     className="absolute right-0 mt-2 min-w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-[101] transition-all duration-200 ease-out"
+                     data-cursor-block="true"
+                  >
                      <ul
                         className="py-1"
                         role="menu"
@@ -320,7 +334,7 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
                )}
             </div>
 
-            <div className="relative" ref={profileRef}>
+            <div className="relative" ref={profileRef} data-cursor-block="true">
                <button
                   onClick={() => setOpenProfile(!openProfile)}
                   className="inline-flex items-center justify-center rounded-full border border-gray-300 shadow-sm p-3 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

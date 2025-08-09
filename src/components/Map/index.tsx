@@ -309,7 +309,7 @@ export const Map = ({ targetLocation }: MapProps) => {
             cursorType === 'hand'
                ? 'grab'
                : cursorType === 'location'
-                 ? "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03eiIgZmlsbD0id2hpdGUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=') 12 24, crosshair"
+                 ? 'none'
                  : 'default';
       }
    }, [cursorType]);
@@ -319,6 +319,7 @@ export const Map = ({ targetLocation }: MapProps) => {
          <div
             ref={mapContainerRef}
             className={`h-screen w-screen cursor-${cursorType}`}
+            data-cursor-scope="map"
             style={{
                position: 'fixed',
                top: 0,
@@ -326,7 +327,7 @@ export const Map = ({ targetLocation }: MapProps) => {
                right: 0,
                bottom: 0,
                overflow: 'hidden',
-               cursor: `${cursorType === 'hand' ? 'grab' : cursorType === 'location' ? "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03eiIgZmlsbD0id2hpdGUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=') 12 24, crosshair" : 'default'} !important`,
+               cursor: `${cursorType === 'hand' ? 'grab' : cursorType === 'location' ? 'none' : 'default'} !important`,
             }}
          />
 

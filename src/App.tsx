@@ -11,11 +11,13 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { CursorProvider } from './contexts/CursorContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { CustomCursor } from './components/Cursor/CustomCursor';
 
 function App() {
    return (
       <BrowserRouter>
          <CursorProvider>
+            <CustomCursor />
             <ToastContainer
                position="bottom-right"
                autoClose={3500}
