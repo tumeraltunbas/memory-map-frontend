@@ -1,23 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../stores/store';
 import { setUser, setLoading } from '../../stores/slices/userSlice';
-import { authAPI } from '../../services/api';
+import { authAPI, type UserProfileResponse } from '../../services/api';
 
 import { AccountLayout } from '../AccountLayout';
+import { IconBookmark, IconBuilding, IconWorld } from '@tabler/icons-react';
 
 export const Profile = () => {
+   const [profile, setProfile] = useState<UserProfileResponse>();
+
    const dispatch = useDispatch();
-   const user = useSelector((state: RootState) => state.user.user);
+   // const user = useSelector((state: RootState) => state.user.user);
    const isLoading = useSelector((state: RootState) => state.user.isLoading);
 
-   // Profile sayfası yüklendiğinde kullanıcı bilgilerini getir
    useEffect(() => {
       const fetchUserProfile = async () => {
          dispatch(setLoading(true));
          try {
-            const userData = await authAPI.getCurrentUser();
-            dispatch(setUser(userData));
+            const profile = await authAPI.profile();
+            setProfile(profile);
+            dispatch(setLoading(false));
          } catch (error) {
             console.error('Error fetching user profile:', error);
             dispatch(setLoading(false));
@@ -56,23 +59,22 @@ export const Profile = () => {
                {/* Profile Info */}
                <div className="flex items-center space-x-6">
                   <div className="h-24 w-24 bg-[#9E7B9B] rounded-full flex items-center justify-center text-white text-3xl font-medium">
-                     {user?.email?.charAt(0)?.toUpperCase() || '?'}
+                     {profile?.user.email?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div>
                      <h3 className="text-xl font-medium text-gray-900">
-                        {user?.email || 'Loading...'}
+                        {profile?.user?.email || 'Loading...'}
                      </h3>
                      <p className="text-sm text-gray-500">
                         Member since{' '}
-                        {user?.createdAt
-                           ? new Date(user.createdAt).toLocaleDateString(
-                                'en-US',
-                                {
-                                   day: 'numeric',
-                                   month: 'long',
-                                   year: 'numeric',
-                                }
-                             )
+                        {profile?.user?.createdAt
+                           ? new Date(
+                                profile?.user.createdAt
+                             ).toLocaleDateString('en-US', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                             })
                            : 'Loading...'}
                      </p>
                   </div>
@@ -84,77 +86,38 @@ export const Profile = () => {
                      Your Activity
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                     <div className="bg-[#F7FAFC] rounded-lg p-6">
-                        <div className="text-3xl font-bold text-[#2D3748]">
-                           {user?.markdowns?.length || 0}
-                        </div>
+                     <div className="bg-[#F7FAFC] rounded-lg p-5">
                         <div className="text-sm text-gray-500 mt-1">
-                           Total Memories
-                        </div>
-                     </div>
-                     <div className="bg-[#F7FAFC] rounded-lg p-6">
-                        <div className="text-3xl font-bold text-[#2D3748]">
-                           {user?.markdowns?.filter((m) => m.photos?.length > 0)
-                              ?.length || 0}
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                           Memories with Photos
-                        </div>
-                     </div>
-                     <div className="bg-[#F7FAFC] rounded-lg p-6">
-                        <div className="text-3xl font-bold text-[#2D3748]">
-                           {user?.markdowns?.reduce(
-                              (acc, curr) => acc + (curr.photos?.length || 0),
-                              0
-                           ) || 0}
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                           Total Photos
-                        </div>
-                     </div>
-                  </div>
-               </div>
-
-               {/* Recent Activity */}
-               <div className="mt-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                     Recent Activity
-                  </h3>
-                  <div className="bg-[#F7FAFC] rounded-lg p-6">
-                     <div className="space-y-4">
-                        {user?.markdowns?.length ? (
-                           user.markdowns.slice(0, 5).map((markdown, index) => (
-                              <div
-                                 key={index}
-                                 className="flex items-center justify-between"
-                              >
-                                 <div className="flex items-center space-x-3">
-                                    <div className="w-2 h-2 bg-[#9E7B9B] rounded-full" />
-                                    <div>
-                                       <p className="text-sm font-medium text-gray-900">
-                                          New memory added
-                                       </p>
-                                       <p className="text-xs text-gray-500">
-                                          {new Date(
-                                             markdown.createdAt
-                                          ).toLocaleDateString('en-US', {
-                                             day: 'numeric',
-                                             month: 'long',
-                                             year: 'numeric',
-                                          })}
-                                       </p>
-                                    </div>
-                                 </div>
-                                 <span className="text-xs text-gray-500">
-                                    {markdown.photos?.length || 0} photos
-                                 </span>
-                              </div>
-                           ))
-                        ) : (
-                           <div className="text-center text-gray-500">
-                              No recent activity
+                           <div className="flex items-center gap-1">
+                              <IconBookmark />
+                              Total Memories
                            </div>
-                        )}
+                        </div>
+                        <div className="text-3xl font-bold text-[#2D3748] mt-2">
+                           {profile?.totalMarkdownCount || 0}
+                        </div>
+                     </div>
+
+                     <div className="bg-[#F7FAFC] rounded-lg p-6">
+                        <div className="flex items-center gap-1">
+                           <IconWorld />
+                           Countries with memories
+                        </div>
+                        <div className="text-3xl font-bold text-[#2D3748] mt-2">
+                           {profile?.totalCountryCount || 0}
+                        </div>
+                     </div>
+
+                     <div className="bg-[#F7FAFC] rounded-lg p-6">
+                        <div className="text-sm text-gray-500 mt-1">
+                           <div className="flex items-center gap-1">
+                              <IconBuilding />
+                              Cities with memories
+                           </div>
+                        </div>
+                        <div className="text-3xl font-bold text-[#2D3748] mt-2">
+                           {profile?.totalCityCount || 0}
+                        </div>
                      </div>
                   </div>
                </div>

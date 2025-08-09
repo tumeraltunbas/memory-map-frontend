@@ -8,14 +8,6 @@ const api = axios.create({
    withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-   const token = localStorage.getItem('token');
-   if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-   }
-   return config;
-});
-
 api.interceptors.response.use(
    (response) => response,
    (error) => {
@@ -26,6 +18,17 @@ api.interceptors.response.use(
       return Promise.reject(error);
    }
 );
+
+export type UserProfileResponse = {
+   user: {
+      userId: string;
+      email: string;
+      createdAt: Date;
+   };
+   totalMarkdownCount: number;
+   totalCountryCount: number;
+   totalCityCount: number;
+};
 
 export const authAPI = {
    login: async (email: string, password: string) => {
@@ -52,6 +55,11 @@ export const authAPI = {
          currentPassword,
          newPassword,
       });
+      return response.data;
+   },
+
+   profile: async () => {
+      const response = await api.get('/users/profile');
       return response.data;
    },
 };
