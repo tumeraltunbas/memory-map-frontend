@@ -20,8 +20,6 @@ export const ImageViewer = ({
    hasNext = false,
    hasPrev = false,
 }: ImageViewerProps) => {
-   // Klavye olaylarını dinle
-   // Handle keyboard events
    useEffect(() => {
       if (!isOpen) return;
 
@@ -43,7 +41,6 @@ export const ImageViewer = ({
       return () => window.removeEventListener('keydown', handleKeyDown);
    }, [isOpen, onNext, onPrev, hasNext, hasPrev, onClose]);
 
-   // Handle header visibility
    useEffect(() => {
       setHeaderVisibility(!isOpen);
       return () => setHeaderVisibility(true);
@@ -55,7 +52,6 @@ export const ImageViewer = ({
          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-lg flex items-center justify-center"
          onClick={onClose}
       >
-         {/* Close Button */}
          <button
             onClick={onClose}
             className="absolute top-6 right-6 text-white/80 hover:text-white transition-all duration-200 p-3 rounded-full hover:bg-white/10 group"
@@ -76,7 +72,6 @@ export const ImageViewer = ({
             </svg>
          </button>
 
-         {/* Navigation Buttons */}
          {hasPrev && (
             <button
                onClick={(e) => {
@@ -125,7 +120,6 @@ export const ImageViewer = ({
             </button>
          )}
 
-         {/* Image Container */}
          <div
             className="w-full h-full p-4 flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
@@ -138,7 +132,6 @@ export const ImageViewer = ({
             />
          </div>
 
-         {/* Navigation Hint */}
          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm flex items-center gap-4">
             {hasPrev && (
                <span className="flex items-center gap-1">

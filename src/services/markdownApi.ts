@@ -39,7 +39,6 @@ export interface UpdateMarkdownNoteRequest {
 }
 
 export const markdownAPI = {
-   // Markdown endpoints
    createMarkdown: async (data: CreateMarkdownRequest) => {
       const response = await api.post('/markdowns', data);
       return response.data;
@@ -63,7 +62,6 @@ export const markdownAPI = {
       await api.patch(`/markdowns/${markdownId}`, data);
    },
 
-   // Markdown Note endpoints
    createMarkdownNote: async (data: CreateMarkdownNoteRequest) => {
       const response = await api.post('/markdown-notes', data);
       return response.data;
@@ -82,7 +80,6 @@ export const markdownAPI = {
       });
    },
 
-   // Markdown Photo endpoints
    uploadMarkdownPhotos: async (markdownId: string, files: File[]) => {
       const formData = new FormData();
       formData.append('markdownId', markdownId);

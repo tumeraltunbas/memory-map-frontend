@@ -48,7 +48,6 @@ export const Settings = () => {
                   </h3>
 
                   <div className="space-y-6">
-                     {/* Password */}
                      <div>
                         <label
                            htmlFor="password"

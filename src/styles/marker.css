@@ -3,7 +3,7 @@
 }
 
 .marker img {
-   width: 32px; /* İstediğiniz boyutu buradan ayarlayabilirsiniz */
+   width: 32px;
    height: 32px;
 }
 
@@ -70,7 +70,6 @@
    stroke-width: 1.75;
 }
 
-/* Mapboxgl popup stilleri */
 .mapboxgl-popup {
    max-width: none !important;
 }

@@ -19,7 +19,6 @@ import '../../styles/marker.css';
 import '../../styles/cursor.css';
 import LocationMarker from '../../../public/cursors/location.svg';
 
-// Mapbox token'ı ayarla
 mapboxgl.accessToken = import.meta.env.VITE_MAP_BOX_ACCESS_KEY || '';
 
 interface MapProps {

@@ -34,7 +34,6 @@ function App() {
                <Route path="/login" element={<Login />} />
                <Route path="/register" element={<Register />} />
 
-               {/* Protected Routes */}
                <Route
                   path="/map"
                   element={
@@ -60,7 +59,6 @@ function App() {
                   }
                />
 
-               {/* Redirect any unknown routes to home */}
                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
          </CursorProvider>

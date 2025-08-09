@@ -40,22 +40,17 @@ export const ViewMarkdownModal = ({
    const [confirmDeleteMarkdown, setConfirmDeleteMarkdown] =
       useState<boolean>(false);
 
-   // Photo upload handled via grid tile; no staged uploading state or refs
-
    const [showAddNote, setShowAddNote] = useState<boolean>(false);
    const [noteText, setNoteText] = useState<string>('');
    const [savingNote, setSavingNote] = useState<boolean>(false);
    const [openMoreActions, setOpenMoreActions] = useState<boolean>(false);
    const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
-   // No section refs; composer opens inline where the tile is
-
    interface Note {
       id: string;
       text: string;
    }
 
-   // Not içeriğinin ilk satırını ve karakter sayısını al
    const getNotePreview = (note: string) => {
       const firstLine = note.split('\n')[0];
       if (firstLine.length <= 100) return firstLine;
@@ -63,7 +58,6 @@ export const ViewMarkdownModal = ({
    };
 
    useEffect(() => {
-      // Close on ESC
       if (!isOpen) return;
       const onKeyDown = (e: KeyboardEvent) => {
          if (e.key === 'Escape') {
@@ -74,7 +68,6 @@ export const ViewMarkdownModal = ({
       return () => window.removeEventListener('keydown', onKeyDown);
    }, [isOpen, onClose]);
 
-   // Close more menu on outside click
    useEffect(() => {
       if (!openMoreActions) return;
       const handleOutside = (e: MouseEvent) => {
@@ -89,7 +82,6 @@ export const ViewMarkdownModal = ({
       return () => document.removeEventListener('mousedown', handleOutside);
    }, [openMoreActions]);
 
-   // Reset more menu on modal close or when other overlays open
    useEffect(() => {
       if (
          !isOpen ||
@@ -112,7 +104,6 @@ export const ViewMarkdownModal = ({
       const fetchMarkdown = async () => {
          if (!isOpen || !markdownId) return;
 
-         // Reset states when modal opens
          setMarkdown(null);
          setLoadingImages({});
          setSelectedNote(null);
@@ -121,7 +112,6 @@ export const ViewMarkdownModal = ({
          dispatch(setLoading(true));
          try {
             const response = await markdownAPI.getSingleMarkdown(markdownId);
-            // Her fotoğraf için loading state'i true olarak ayarla
             const initialLoadingState = response.photos.reduce(
                (
                   acc: { [key: string]: boolean },
@@ -174,8 +164,6 @@ export const ViewMarkdownModal = ({
       }
    };
 
-   // Removed: staged previews flow
-
    const uploadFiles = async (filesToUpload: File[]) => {
       if (!filesToUpload.length) return;
       setIsUploadingPhotos(true);
@@ -183,9 +171,7 @@ export const ViewMarkdownModal = ({
       try {
          await markdownAPI.uploadMarkdownPhotos(markdownId, filesToUpload);
          await refreshMarkdown();
-         // nothing to clear in the tile upload flow
       } catch (error) {
-         // interceptor will toast
       } finally {
          dispatch(setLoading(false));
          setIsUploadingPhotos(false);

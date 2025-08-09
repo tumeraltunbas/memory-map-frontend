@@ -80,7 +80,6 @@ export const mapboxSearchAPI = {
          if (data.features.length > 0) {
             const feature = data.features[0];
             if (feature.geometry?.coordinates) {
-               // Mapbox coordinates are in [longitude, latitude] format
                return feature.geometry.coordinates;
             }
          }
@@ -119,7 +118,6 @@ export const mapboxSearchAPI = {
          return data.suggestions;
       } catch (error) {
          if (error instanceof Error && error.name === 'AbortError') {
-            // İstek iptal edildi, normal bir durum
             return [];
          }
          toast.error(

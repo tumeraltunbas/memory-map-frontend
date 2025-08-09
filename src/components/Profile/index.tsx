@@ -11,7 +11,6 @@ export const Profile = () => {
    const [profile, setProfile] = useState<UserProfileResponse>();
 
    const dispatch = useDispatch();
-   // const user = useSelector((state: RootState) => state.user.user);
    const isLoading = useSelector((state: RootState) => state.user.isLoading);
 
    useEffect(() => {
@@ -56,7 +55,6 @@ export const Profile = () => {
             </div>
 
             <div className="py-6">
-               {/* Profile Info */}
                <div className="flex items-center space-x-6">
                   <div className="h-24 w-24 bg-[#9E7B9B] rounded-full flex items-center justify-center text-white text-3xl font-medium">
                      {profile?.user.email?.charAt(0)?.toUpperCase() || '?'}
@@ -80,7 +78,6 @@ export const Profile = () => {
                   </div>
                </div>
 
-               {/* Stats */}
                <div className="mt-8">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                      Your Activity
