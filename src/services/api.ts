@@ -12,13 +12,13 @@ const api = axios.create({
 api.interceptors.response.use(
    (response) => response,
    (error) => {
-      const status = error.response?.status;
+      const code = error.response?.data?.code;
       const message =
          error.response?.data?.message || error.message || 'Request failed';
 
       toast.error(message);
 
-      if (status === 401) {
+      if (code === 'authorization_error') {
          localStorage.removeItem('token');
          toast.error('Your session has expired. Please log in again.');
          window.location.href = '/login';
