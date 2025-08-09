@@ -98,9 +98,6 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
       setActiveMapTool(newTool);
       setCursorType(newTool);
       setOpenMapTools(false);
-
-      // Debug için cursor değişimini konsola yazdır
-      console.log('Cursor changed to:', newTool);
    };
 
    const getMapToolIcon = () => {
@@ -174,7 +171,7 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search locations..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-full border border-gray-300 shadow-sm bg-white text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-full border border-gray-300 shadow-sm bg-white text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
                />
                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg

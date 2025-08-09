@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 interface SearchSuggestion {
    name: string;
    mapbox_id: string;
@@ -85,7 +86,13 @@ export const mapboxSearchAPI = {
          }
          throw new Error('No coordinates found');
       } catch (error) {
-         console.error('Retrieve error:', error);
+         if (!(error instanceof Error && error.name === 'AbortError')) {
+            toast.error(
+               error instanceof Error
+                  ? error.message
+                  : 'Failed to retrieve location details'
+            );
+         }
          throw error;
       }
    },
@@ -115,7 +122,9 @@ export const mapboxSearchAPI = {
             // İstek iptal edildi, normal bir durum
             return [];
          }
-         console.error('Search error:', error);
+         toast.error(
+            error instanceof Error ? error.message : 'Search request failed'
+         );
          throw error;
       }
    },

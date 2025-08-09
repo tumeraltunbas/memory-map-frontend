@@ -9,11 +9,24 @@ import { Login } from './components/Auth/Login';
 import { Register } from './components/Auth/Register';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { CursorProvider } from './contexts/CursorContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
    return (
       <BrowserRouter>
          <CursorProvider>
+            <ToastContainer
+               position="bottom-right"
+               autoClose={3500}
+               hideProgressBar={false}
+               newestOnTop
+               closeOnClick
+               pauseOnFocusLoss
+               draggable
+               pauseOnHover
+               theme="light"
+            />
             <Routes>
                <Route path="/" element={<Landing />} />
                <Route path="/login" element={<Login />} />

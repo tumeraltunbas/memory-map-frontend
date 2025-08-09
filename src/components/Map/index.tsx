@@ -11,12 +11,9 @@ import {
    setLoading,
    setError,
    setMarkdowns,
-   updateMarkdown,
 } from '../../stores/slices/markdownsSlice';
 import { markdownAPI } from '../../services/markdownApi';
 
-import { PhotoModal } from '../Modals/PhotoModal';
-import { MemoryModal } from '../Modals/MemoryModal';
 import { ViewMarkdownModal } from '../Modals/ViewMarkdownModal';
 import '../../styles/marker.css';
 import '../../styles/cursor.css';
@@ -34,8 +31,6 @@ export const Map = ({ targetLocation }: MapProps) => {
    const { cursorType } = useCursor();
 
    // Modal states
-   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
-   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [activeMarkerId, setActiveMarkerId] = useState<string | null>(null);
 
@@ -333,75 +328,7 @@ export const Map = ({ targetLocation }: MapProps) => {
       }
    }, [cursorType]);
 
-   const handlePhotoSave = async (files: File[]) => {
-      if (!activeMarkerId || !files.length) return;
-
-      dispatch(setLoading(true));
-      try {
-         // Fotoğrafları yükle
-         await markdownAPI.uploadMarkdownPhotos(activeMarkerId, files);
-
-         // Güncel markdown'ı al
-         const updatedMarkdown =
-            await markdownAPI.getSingleMarkdown(activeMarkerId);
-
-         // Redux store'u güncelle
-         dispatch(
-            updateMarkdown({
-               ...updatedMarkdown,
-               createdAt: new Date(updatedMarkdown.createdAt),
-               updatedAt: new Date(updatedMarkdown.updatedAt),
-            })
-         );
-
-         setIsPhotoModalOpen(false);
-         setActiveMarkerId(null);
-      } catch (error) {
-         console.error('Error uploading photos:', error);
-         dispatch(
-            setError(
-               error instanceof Error
-                  ? error.message
-                  : 'Failed to upload photos'
-            )
-         );
-      }
-   };
-
-   const handleMemorySave = async (text: string) => {
-      if (!activeMarkerId) return;
-
-      dispatch(setLoading(true));
-      try {
-         await markdownAPI.createMarkdownNote({
-            markdownId: activeMarkerId,
-            text: text,
-         });
-
-         // Güncel markdown'ı al
-         const updatedMarkdown =
-            await markdownAPI.getSingleMarkdown(activeMarkerId);
-
-         // Redux store'u güncelle
-         dispatch(
-            updateMarkdown({
-               ...updatedMarkdown,
-               createdAt: new Date(updatedMarkdown.createdAt),
-               updatedAt: new Date(updatedMarkdown.updatedAt),
-            })
-         );
-
-         setIsMemoryModalOpen(false);
-         setActiveMarkerId(null);
-      } catch (error) {
-         console.error('Error saving note:', error);
-         dispatch(
-            setError(
-               error instanceof Error ? error.message : 'Failed to save note'
-            )
-         );
-      }
-   };
+   // Inline add flows now live inside ViewMarkdownModal
 
    return (
       <>
@@ -419,26 +346,6 @@ export const Map = ({ targetLocation }: MapProps) => {
             }}
          />
 
-         <PhotoModal
-            isOpen={isPhotoModalOpen}
-            onClose={() => {
-               setIsPhotoModalOpen(false);
-               setActiveMarkerId(null);
-            }}
-            onSave={handlePhotoSave}
-            markerId={activeMarkerId || ''}
-         />
-
-         <MemoryModal
-            isOpen={isMemoryModalOpen}
-            onClose={() => {
-               setIsMemoryModalOpen(false);
-               setActiveMarkerId(null);
-            }}
-            onSave={handleMemorySave}
-            markerId={activeMarkerId || ''}
-         />
-
          <ViewMarkdownModal
             isOpen={isViewModalOpen}
             onClose={() => {
@@ -446,14 +353,6 @@ export const Map = ({ targetLocation }: MapProps) => {
                setActiveMarkerId(null);
             }}
             markdownId={activeMarkerId || ''}
-            onAddPhoto={() => {
-               setIsViewModalOpen(false);
-               setIsPhotoModalOpen(true);
-            }}
-            onAddNote={() => {
-               setIsViewModalOpen(false);
-               setIsMemoryModalOpen(true);
-            }}
          />
       </>
    );

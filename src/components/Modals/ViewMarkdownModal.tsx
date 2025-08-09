@@ -1,24 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { markdownAPI } from '../../services/markdownApi';
 import type { MarkdownResponse } from '../../services/markdownApi';
 import { setError, setLoading } from '../../stores/slices/markdownsSlice';
 import { ImageViewer } from './ImageViewer';
+import { ConfirmModal } from './ConfirmModal';
 
 interface ViewMarkdownModalProps {
    isOpen: boolean;
    onClose: () => void;
    markdownId: string;
-   onAddPhoto: () => void;
-   onAddNote: () => void;
 }
 
 export const ViewMarkdownModal = ({
    isOpen,
    onClose,
    markdownId,
-   onAddPhoto,
-   onAddNote,
 }: ViewMarkdownModalProps) => {
    const dispatch = useDispatch();
    const [markdown, setMarkdown] = useState<MarkdownResponse | null>(null);
@@ -30,6 +27,22 @@ export const ViewMarkdownModal = ({
       url: string;
    } | null>(null);
    const [selectedNote, setSelectedNote] = useState<number | null>(null);
+   const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState<
+      string | null
+   >(null);
+   const [confirmDeletePhotoId, setConfirmDeletePhotoId] = useState<
+      string | null
+   >(null);
+   const [isUploadingPhotos, setIsUploadingPhotos] = useState<boolean>(false);
+   const prevSelectedNoteRef = useRef<number | null>(null);
+
+   // Photo upload handled via grid tile; no staged uploading state or refs
+
+   const [showAddNote, setShowAddNote] = useState<boolean>(false);
+   const [noteText, setNoteText] = useState<string>('');
+   const [savingNote, setSavingNote] = useState<boolean>(false);
+
+   // No section refs; composer opens inline where the tile is
 
    interface Note {
       id: string;
@@ -94,90 +107,162 @@ export const ViewMarkdownModal = ({
       };
    }, [isOpen, markdownId, dispatch]);
 
+   const refreshMarkdown = async () => {
+      try {
+         const response = await markdownAPI.getSingleMarkdown(markdownId);
+         setMarkdown(response);
+      } catch (error) {
+         dispatch(
+            setError(
+               error instanceof Error
+                  ? error.message
+                  : 'Failed to refresh markdown'
+            )
+         );
+      }
+   };
+
+   // Removed: staged previews flow
+
+   const uploadFiles = async (filesToUpload: File[]) => {
+      if (!filesToUpload.length) return;
+      setIsUploadingPhotos(true);
+      dispatch(setLoading(true));
+      try {
+         await markdownAPI.uploadMarkdownPhotos(markdownId, filesToUpload);
+         await refreshMarkdown();
+         // nothing to clear in the tile upload flow
+      } catch (error) {
+         // interceptor will toast
+      } finally {
+         dispatch(setLoading(false));
+         setIsUploadingPhotos(false);
+      }
+   };
+
+   // Removed: staged upload button
+
+   const handleAddNote = async () => {
+      if (!noteText.trim()) return;
+      setSavingNote(true);
+      dispatch(setLoading(true));
+      try {
+         await markdownAPI.createMarkdownNote({ markdownId, text: noteText });
+         await refreshMarkdown();
+         setNoteText('');
+         setShowAddNote(false);
+      } catch (error) {
+         // interceptor will toast
+      } finally {
+         setSavingNote(false);
+         dispatch(setLoading(false));
+      }
+   };
+
    if (!isOpen || !markdown) return null;
 
    return (
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-[1000]">
-         <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-               <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-medium text-gray-900">
-                     {markdown.title}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                     <button
-                        onClick={onAddPhoto}
-                        className="flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                        title="Add Photo"
-                     >
-                        <svg
-                           className="w-5 h-5"
-                           fill="none"
-                           stroke="currentColor"
-                           viewBox="0 0 24 24"
-                        >
-                           <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 16l4-4a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                           />
-                        </svg>
-                        <span className="text-sm font-medium">Add Photo</span>
-                     </button>
-                     <button
-                        onClick={onAddNote}
-                        className="flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                        title="Add Note"
-                     >
-                        <svg
-                           className="w-5 h-5"
-                           fill="none"
-                           stroke="currentColor"
-                           viewBox="0 0 24 24"
-                        >
-                           <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                           />
-                        </svg>
-                        <span className="text-sm font-medium">Add Note</span>
-                     </button>
-                     <button
-                        onClick={onClose}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
-                        title="Close"
-                     >
-                        <svg
-                           className="w-5 h-5"
-                           fill="none"
-                           stroke="currentColor"
-                           viewBox="0 0 24 24"
-                        >
-                           <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                           />
-                        </svg>
-                     </button>
-                  </div>
-               </div>
-            </div>
+         <div className="relative bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+            {/* Close button (floating) */}
+            <button
+               onClick={onClose}
+               className="absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+               title="Close"
+            >
+               <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+               >
+                  <path
+                     strokeLinecap="round"
+                     strokeLinejoin="round"
+                     strokeWidth={2}
+                     d="M6 18L18 6M6 6l12 12"
+                  />
+               </svg>
+            </button>
 
             {/* Content */}
-            <div className="px-6 py-4">
+            <div className="px-6 py-5">
+               {/* Title only (header removed) */}
+               <h2 className="text-lg font-semibold text-gray-900 mb-6">
+                  Memory
+               </h2>
+               {/* Inline Add Photo (removed in favor of grid upload tile) */}
+
+               {/* Note composer rendered only within the Notes section below */}
                {/* Photos Section */}
                {markdown.photos.length > 0 && (
                   <div className="mb-8">
-                     <h3 className="text-sm font-medium text-gray-500 mb-4">
-                        Photos
-                     </h3>
+                     <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-medium text-gray-500">
+                           Photos
+                        </h3>
+                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {/* Uploading overlay over grid */}
+                        {isUploadingPhotos && (
+                           <div className="col-span-2 md:col-span-3">
+                              <div className="w-full h-24 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200">
+                                 <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                    <svg
+                                       className="animate-spin h-5 w-5 text-gray-400"
+                                       viewBox="0 0 24 24"
+                                       fill="none"
+                                       stroke="currentColor"
+                                    >
+                                       <circle
+                                          className="opacity-25"
+                                          cx="12"
+                                          cy="12"
+                                          r="10"
+                                          strokeWidth="4"
+                                       ></circle>
+                                       <path
+                                          className="opacity-75"
+                                          d="M4 12a8 8 0 018-8"
+                                          strokeWidth="4"
+                                       ></path>
+                                    </svg>
+                                    Uploading photos...
+                                 </div>
+                              </div>
+                           </div>
+                        )}
+                        {/* Upload tile always visible */}
+                        <label className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center cursor-pointer hover:border-[#9E7B9B] transition-colors">
+                           <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                 const selected = Array.from(
+                                    e.target.files || []
+                                 );
+                                 uploadFiles(selected);
+                              }}
+                           />
+                           <div className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-gray-500">
+                              <svg
+                                 className="w-5 h-5"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                              >
+                                 <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4v16m8-8H4"
+                                 />
+                              </svg>
+                           </div>
+                        </label>
+
                         {markdown.photos.map((photo, index) => (
                            <div
                               key={index}
@@ -214,40 +299,7 @@ export const ViewMarkdownModal = ({
                               <button
                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    if (
-                                       confirm(
-                                          'Are you sure you want to delete this photo?'
-                                       )
-                                    ) {
-                                       dispatch(setLoading(true));
-                                       markdownAPI
-                                          .deleteMarkdownPhoto(
-                                             markdownId,
-                                             photo.id
-                                          )
-                                          .then(() =>
-                                             markdownAPI.getSingleMarkdown(
-                                                markdownId
-                                             )
-                                          )
-                                          .then((response) => {
-                                             setMarkdown(response);
-                                             dispatch(setLoading(false));
-                                          })
-                                          .catch((error) => {
-                                             console.error(
-                                                'Error deleting photo:',
-                                                error
-                                             );
-                                             dispatch(
-                                                setError(
-                                                   error instanceof Error
-                                                      ? error.message
-                                                      : 'Failed to delete photo'
-                                                )
-                                             );
-                                          });
-                                    }
+                                    setConfirmDeletePhotoId(photo.id);
                                  }}
                                  className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 hover:bg-black/70 transition-all duration-200"
                               >
@@ -271,12 +323,69 @@ export const ViewMarkdownModal = ({
                   </div>
                )}
 
-               {/* Notes Section */}
-               {markdown.notes.length > 0 && (
-                  <div>
-                     <h3 className="text-sm font-medium text-gray-500 mb-4">
+               {/* Notes Section with add tile at top */}
+               <div>
+                  <div className="flex items-center justify-between mb-4">
+                     <h3 className="text-sm font-medium text-gray-500">
                         Notes
                      </h3>
+                  </div>
+
+                  {/* Add Note tile / composer at top */}
+                  {showAddNote ? (
+                     <div className="mb-3 border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                           <h4 className="text-sm font-medium text-gray-700">
+                              Add Note
+                           </h4>
+                           <button
+                              className="text-xs text-gray-500 hover:text-gray-700"
+                              onClick={() => setShowAddNote(false)}
+                           >
+                              Cancel
+                           </button>
+                        </div>
+                        <textarea
+                           value={noteText}
+                           onChange={(e) => setNoteText(e.target.value)}
+                           placeholder="Write your memory here..."
+                           className="w-full min-h-28 p-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#9E7B9B] focus:border-transparent"
+                        />
+                        <div className="flex justify-end mt-3">
+                           <button
+                              onClick={handleAddNote}
+                              disabled={savingNote || !noteText.trim()}
+                              className={`px-4 py-2 rounded-md text-white ${savingNote || !noteText.trim() ? 'bg-[#9E7B9B]/60 cursor-not-allowed' : 'bg-[#9E7B9B] hover:bg-[#8B6B8B]'}`}
+                           >
+                              {savingNote ? 'Saving...' : 'Save Note'}
+                           </button>
+                        </div>
+                     </div>
+                  ) : (
+                     <div
+                        className="mb-3 relative p-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center cursor-pointer hover:border-[#9E7B9B]"
+                        onClick={() => setShowAddNote(true)}
+                     >
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white shadow text-gray-600 hover:text-[#2D3748] hover:shadow-md transition">
+                           <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                           >
+                              <path
+                                 strokeLinecap="round"
+                                 strokeLinejoin="round"
+                                 strokeWidth={2}
+                                 d="M12 4v16m8-8H4"
+                              />
+                           </svg>
+                           <span className="text-sm font-medium">Add Note</span>
+                        </div>
+                     </div>
+                  )}
+
+                  {markdown.notes.length > 0 && (
                      <div className="space-y-3">
                         {markdown.notes.map((note: Note, index) => (
                            <div
@@ -286,16 +395,11 @@ export const ViewMarkdownModal = ({
                                     selectedNote === index ? null : index
                                  )
                               }
-                              className={`p-4 bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer
-                                 ${selectedNote === index ? 'ring-1 ring-gray-300' : 'hover:bg-gray-100'}`}
+                              className={`p-4 bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer ${selectedNote === index ? 'ring-1 ring-gray-300' : 'hover:bg-gray-100'}`}
                            >
                               <div className="flex items-start justify-between gap-4">
                                  <p
-                                    className={`text-gray-700 leading-relaxed flex-1 ${
-                                       selectedNote === index
-                                          ? 'whitespace-pre-wrap'
-                                          : 'line-clamp-1'
-                                    }`}
+                                    className={`text-gray-700 leading-relaxed flex-1 ${selectedNote === index ? 'whitespace-pre-wrap' : 'line-clamp-1'}`}
                                  >
                                     {selectedNote === index
                                        ? note.text
@@ -305,40 +409,9 @@ export const ViewMarkdownModal = ({
                                     <button
                                        onClick={(e) => {
                                           e.stopPropagation();
-                                          if (
-                                             confirm(
-                                                'Are you sure you want to delete this note?'
-                                             )
-                                          ) {
-                                             dispatch(setLoading(true));
-                                             markdownAPI
-                                                .deleteMarkdownNote(
-                                                   markdownId,
-                                                   note.id
-                                                )
-                                                .then(() =>
-                                                   markdownAPI.getSingleMarkdown(
-                                                      markdownId
-                                                   )
-                                                )
-                                                .then((response) => {
-                                                   setMarkdown(response);
-                                                   dispatch(setLoading(false));
-                                                })
-                                                .catch((error) => {
-                                                   console.error(
-                                                      'Error deleting note:',
-                                                      error
-                                                   );
-                                                   dispatch(
-                                                      setError(
-                                                         error instanceof Error
-                                                            ? error.message
-                                                            : 'Failed to delete note'
-                                                      )
-                                                   );
-                                                });
-                                          }
+                                          prevSelectedNoteRef.current =
+                                             selectedNote;
+                                          setConfirmDeleteNoteId(note.id);
                                        }}
                                        className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
                                     >
@@ -357,11 +430,7 @@ export const ViewMarkdownModal = ({
                                        </svg>
                                     </button>
                                     <svg
-                                       className={`w-5 h-5 text-gray-400 shrink-0 transform transition-transform duration-200 ${
-                                          selectedNote === index
-                                             ? 'rotate-180'
-                                             : ''
-                                       }`}
+                                       className={`w-5 h-5 text-gray-400 shrink-0 transform transition-transform duration-200 ${selectedNote === index ? 'rotate-180' : ''}`}
                                        fill="none"
                                        stroke="currentColor"
                                        viewBox="0 0 24 24"
@@ -374,22 +443,60 @@ export const ViewMarkdownModal = ({
                                        />
                                     </svg>
                                  </div>
+
+                                 {/* Confirm modal rendered once below */}
                               </div>
                            </div>
                         ))}
                      </div>
+                  )}
+               </div>
+
+               {/* Empty State */}
+               {markdown.photos.length === 0 && (
+                  <div className="mb-8">
+                     <h3 className="text-sm font-medium text-gray-500 mb-4">
+                        Photos
+                     </h3>
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {/* Empty photo tile - label triggers input */}
+                        <label className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-[#9E7B9B] transition-colors">
+                           <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                 const selected = Array.from(
+                                    e.target.files || []
+                                 );
+                                 uploadFiles(selected);
+                              }}
+                           />
+                           <div
+                              className="w-12 h-12 rounded-full bg-white shadow flex items-center justify-center text-gray-500 hover:text-[#9E7B9B] hover:shadow-md transition"
+                              title="Add Photos"
+                           >
+                              <svg
+                                 className="w-6 h-6"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                              >
+                                 <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4v16m8-8H4"
+                                 />
+                              </svg>
+                           </div>
+                        </label>
+                     </div>
                   </div>
                )}
 
-               {/* Empty State */}
-               {markdown.photos.length === 0 && markdown.notes.length === 0 && (
-                  <div className="text-center py-12">
-                     <p className="text-gray-500">
-                        No photos or notes yet. Add some memories to this
-                        location!
-                     </p>
-                  </div>
-               )}
+               {/* Empty Notes handled by the Notes section add tile above */}
             </div>
          </div>
 
@@ -423,6 +530,77 @@ export const ViewMarkdownModal = ({
                   selectedImage &&
                   markdown.photos.indexOf(selectedImage) > 0
             )}
+         />
+
+         {/* Confirm delete photo */}
+         <ConfirmModal
+            isOpen={confirmDeletePhotoId !== null}
+            title="Delete photo?"
+            description="This action cannot be undone."
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={() => {
+               if (!confirmDeletePhotoId) return;
+               dispatch(setLoading(true));
+               markdownAPI
+                  .deleteMarkdownPhoto(markdownId, confirmDeletePhotoId)
+                  .then(() => markdownAPI.getSingleMarkdown(markdownId))
+                  .then((response) => {
+                     setMarkdown(response);
+                     dispatch(setLoading(false));
+                     setConfirmDeletePhotoId(null);
+                  })
+                  .catch((error) => {
+                     console.error('Error deleting photo:', error);
+                     dispatch(
+                        setError(
+                           error instanceof Error
+                              ? error.message
+                              : 'Failed to delete photo'
+                        )
+                     );
+                     setConfirmDeletePhotoId(null);
+                  });
+            }}
+            onCancel={() => setConfirmDeletePhotoId(null)}
+         />
+
+         {/* Confirm delete note (single instance) */}
+         <ConfirmModal
+            isOpen={confirmDeleteNoteId !== null}
+            title="Delete note?"
+            description="This action cannot be undone."
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={() => {
+               if (!confirmDeleteNoteId) return;
+               dispatch(setLoading(true));
+               markdownAPI
+                  .deleteMarkdownNote(markdownId, confirmDeleteNoteId)
+                  .then(() => markdownAPI.getSingleMarkdown(markdownId))
+                  .then((response) => {
+                     setMarkdown(response);
+                     dispatch(setLoading(false));
+                     setSelectedNote(null);
+                     setConfirmDeleteNoteId(null);
+                  })
+                  .catch((error) => {
+                     console.error('Error deleting note:', error);
+                     dispatch(
+                        setError(
+                           error instanceof Error
+                              ? error.message
+                              : 'Failed to delete note'
+                        )
+                     );
+                     setConfirmDeleteNoteId(null);
+                  });
+            }}
+            onCancel={() => {
+               setConfirmDeleteNoteId(null);
+               // Restore previous selected note to avoid unintended expansion
+               // If none, keep current state
+            }}
          />
       </div>
    );

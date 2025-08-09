@@ -10,23 +10,16 @@ export const Login = () => {
    const navigate = useNavigate();
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
-   const [error, setError] = useState('');
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      setError('');
 
       try {
          await authAPI.login(email, password);
-
-         // Get user details after successful login
          const userData = await authAPI.getCurrentUser();
          dispatch(setUser(userData));
-
          navigate('/map');
-      } catch (err) {
-         setError('Invalid email or password');
-      }
+      } catch (err) {}
    };
 
    return (
@@ -35,12 +28,6 @@ export const Login = () => {
          subtitle="Sign in to your account to continue"
       >
          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-                  {error}
-               </div>
-            )}
-
             <div>
                <label
                   htmlFor="email"

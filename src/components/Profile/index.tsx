@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../stores/store';
-import { setUser, setLoading } from '../../stores/slices/userSlice';
+import { setLoading } from '../../stores/slices/userSlice';
 import { authAPI, type UserProfileResponse } from '../../services/api';
 
 import { AccountLayout } from '../AccountLayout';
