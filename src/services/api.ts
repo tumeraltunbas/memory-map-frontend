@@ -8,7 +8,6 @@ const api = axios.create({
    withCredentials: true,
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use((config) => {
    const token = localStorage.getItem('token');
    if (token) {
@@ -17,7 +16,6 @@ api.interceptors.request.use((config) => {
    return config;
 });
 
-// Response interceptor to handle errors
 api.interceptors.response.use(
    (response) => response,
    (error) => {
@@ -46,6 +44,14 @@ export const authAPI = {
 
    getCurrentUser: async () => {
       const response = await api.get('/users');
+      return response.data;
+   },
+
+   changePassword: async (currentPassword: string, newPassword: string) => {
+      const response = await api.patch('/auth/password', {
+         currentPassword,
+         newPassword,
+      });
       return response.data;
    },
 };

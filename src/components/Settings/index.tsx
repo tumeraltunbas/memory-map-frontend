@@ -2,17 +2,32 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../stores/store';
 import { AccountLayout } from '../AccountLayout';
+import { authAPI } from '../../services/api';
 
 export const Settings = () => {
    const user = useSelector((state: RootState) => state.user.user);
-   const [showChangePassword, setShowChangePassword] = useState(false);
-   const [currentPassword, setCurrentPassword] = useState('');
-   const [newPassword, setNewPassword] = useState('');
-   const [confirmPassword, setConfirmPassword] = useState('');
+   const [showChangePassword, setShowChangePassword] = useState<boolean>(false);
+   const [currentPassword, setCurrentPassword] = useState<string>('');
+   const [newPassword, setNewPassword] = useState<string>('');
+   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
-   const handlePasswordChange = (e: React.FormEvent) => {
+   const handlePasswordChange = async (e: React.FormEvent) => {
       e.preventDefault();
-      // TODO: Implement password change logic
+
+      if (!currentPassword || !newPassword || !confirmPassword) {
+         return;
+      }
+
+      if (newPassword !== confirmPassword) {
+         return;
+      }
+
+      try {
+         await authAPI.changePassword(currentPassword, newPassword);
+      } catch (error) {
+         console.error('Error changing password:', error);
+      }
+
       setShowChangePassword(false);
       setCurrentPassword('');
       setNewPassword('');

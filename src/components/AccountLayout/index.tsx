@@ -1,4 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { authAPI } from '../../services/api';
+import { logout } from '../../stores/slices/userSlice';
+import { useDispatch } from 'react-redux';
+import { IconLogout } from '@tabler/icons-react';
 
 interface AccountLayoutProps {
    children: React.ReactNode;
@@ -6,8 +10,16 @@ interface AccountLayoutProps {
 
 export const AccountLayout = ({ children }: AccountLayoutProps) => {
    const location = useLocation();
+   const navigate = useNavigate();
+   const dispatch = useDispatch();
 
    const isActive = (path: string) => location.pathname === path;
+
+   const handleLogout = () => {
+      authAPI.logout();
+      dispatch(logout());
+      navigate('/');
+   };
 
    return (
       <div className="min-h-screen bg-[#FAFAFA]">
@@ -100,6 +112,15 @@ export const AccountLayout = ({ children }: AccountLayoutProps) => {
                            </svg>
                            Settings
                         </Link>
+
+                        <button
+                           onClick={handleLogout}
+                           className="flex cursor-pointer items-center px-4 py-3 text-sm font-medium rounded-md transition-colors"
+                           role="menuitem"
+                        >
+                           <IconLogout className="w-5 h-5 mr-3" />
+                           <span>Logout</span>
+                        </button>
                      </nav>
                   </div>
                </div>
