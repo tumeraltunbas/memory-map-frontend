@@ -10,12 +10,14 @@ interface ViewMarkdownModalProps {
    isOpen: boolean;
    onClose: () => void;
    markdownId: string;
+   onDelete?: () => void;
 }
 
 export const ViewMarkdownModal = ({
    isOpen,
    onClose,
    markdownId,
+   onDelete,
 }: ViewMarkdownModalProps) => {
    const dispatch = useDispatch();
    const [markdown, setMarkdown] = useState<MarkdownResponse | null>(null);
@@ -35,12 +37,16 @@ export const ViewMarkdownModal = ({
    >(null);
    const [isUploadingPhotos, setIsUploadingPhotos] = useState<boolean>(false);
    const prevSelectedNoteRef = useRef<number | null>(null);
+   const [confirmDeleteMarkdown, setConfirmDeleteMarkdown] =
+      useState<boolean>(false);
 
    // Photo upload handled via grid tile; no staged uploading state or refs
 
    const [showAddNote, setShowAddNote] = useState<boolean>(false);
    const [noteText, setNoteText] = useState<string>('');
    const [savingNote, setSavingNote] = useState<boolean>(false);
+   const [openMoreActions, setOpenMoreActions] = useState<boolean>(false);
+   const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
    // No section refs; composer opens inline where the tile is
 
@@ -55,6 +61,52 @@ export const ViewMarkdownModal = ({
       if (firstLine.length <= 100) return firstLine;
       return firstLine.substring(0, 97) + '...';
    };
+
+   useEffect(() => {
+      // Close on ESC
+      if (!isOpen) return;
+      const onKeyDown = (e: KeyboardEvent) => {
+         if (e.key === 'Escape') {
+            onClose();
+         }
+      };
+      window.addEventListener('keydown', onKeyDown);
+      return () => window.removeEventListener('keydown', onKeyDown);
+   }, [isOpen, onClose]);
+
+   // Close more menu on outside click
+   useEffect(() => {
+      if (!openMoreActions) return;
+      const handleOutside = (e: MouseEvent) => {
+         if (
+            moreMenuRef.current &&
+            !moreMenuRef.current.contains(e.target as Node)
+         ) {
+            setOpenMoreActions(false);
+         }
+      };
+      document.addEventListener('mousedown', handleOutside);
+      return () => document.removeEventListener('mousedown', handleOutside);
+   }, [openMoreActions]);
+
+   // Reset more menu on modal close or when other overlays open
+   useEffect(() => {
+      if (
+         !isOpen ||
+         selectedImage ||
+         confirmDeleteNoteId ||
+         confirmDeletePhotoId ||
+         showAddNote
+      ) {
+         setOpenMoreActions(false);
+      }
+   }, [
+      isOpen,
+      selectedImage,
+      confirmDeleteNoteId,
+      confirmDeletePhotoId,
+      showAddNote,
+   ]);
 
    useEffect(() => {
       const fetchMarkdown = async () => {
@@ -140,8 +192,6 @@ export const ViewMarkdownModal = ({
       }
    };
 
-   // Removed: staged upload button
-
    const handleAddNote = async () => {
       if (!noteText.trim()) return;
       setSavingNote(true);
@@ -152,7 +202,6 @@ export const ViewMarkdownModal = ({
          setNoteText('');
          setShowAddNote(false);
       } catch (error) {
-         // interceptor will toast
       } finally {
          setSavingNote(false);
          dispatch(setLoading(false));
@@ -167,7 +216,7 @@ export const ViewMarkdownModal = ({
             {/* Close button (floating) */}
             <button
                onClick={onClose}
-               className="absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+               className="absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all z-20 pointer-events-auto"
                title="Close"
             >
                <svg
@@ -187,10 +236,43 @@ export const ViewMarkdownModal = ({
 
             {/* Content */}
             <div className="px-6 py-5">
-               {/* Title only (header removed) */}
-               <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                  Memory
-               </h2>
+               {/* Title with compact More menu */}
+               <div className="mb-6 flex items-center gap-2 relative">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                     Memory
+                  </h2>
+                  <div className="relative" ref={moreMenuRef}>
+                     <button
+                        onClick={() => setOpenMoreActions((v) => !v)}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                        aria-label="More actions"
+                     >
+                        <svg
+                           className="w-4 h-4"
+                           viewBox="0 0 24 24"
+                           fill="none"
+                           stroke="currentColor"
+                        >
+                           <circle cx="5" cy="12" r="1.5" />
+                           <circle cx="12" cy="12" r="1.5" />
+                           <circle cx="19" cy="12" r="1.5" />
+                        </svg>
+                     </button>
+                     {openMoreActions && (
+                        <div className="absolute left-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-sm z-10">
+                           <button
+                              onClick={() => {
+                                 setOpenMoreActions(false);
+                                 setConfirmDeleteMarkdown(true);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                           >
+                              Delete Memory
+                           </button>
+                        </div>
+                     )}
+                  </div>
+               </div>
                {/* Inline Add Photo (removed in favor of grid upload tile) */}
 
                {/* Note composer rendered only within the Notes section below */}
@@ -413,7 +495,7 @@ export const ViewMarkdownModal = ({
                                              selectedNote;
                                           setConfirmDeleteNoteId(note.id);
                                        }}
-                                       className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
+                                       className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 cursor-pointer"
                                     >
                                        <svg
                                           className="w-4 h-4"
@@ -497,6 +579,8 @@ export const ViewMarkdownModal = ({
                )}
 
                {/* Empty Notes handled by the Notes section add tile above */}
+
+               {/* Footer actions removed; delete moved to More menu near title */}
             </div>
          </div>
 
@@ -601,6 +685,38 @@ export const ViewMarkdownModal = ({
                // Restore previous selected note to avoid unintended expansion
                // If none, keep current state
             }}
+         />
+
+         {/* Confirm delete markdown */}
+         <ConfirmModal
+            isOpen={confirmDeleteMarkdown}
+            title="Delete this memory?"
+            description="All photos and notes will be removed. This action cannot be undone."
+            confirmText="Delete"
+            cancelText="Cancel"
+            onConfirm={() => {
+               dispatch(setLoading(true));
+               markdownAPI
+                  .deleteMarkdown(markdownId)
+                  .then(() => {
+                     dispatch(setLoading(false));
+                     setConfirmDeleteMarkdown(false);
+                     onClose();
+                     onDelete?.();
+                  })
+                  .catch((error) => {
+                     console.error('Error deleting markdown:', error);
+                     dispatch(
+                        setError(
+                           error instanceof Error
+                              ? error.message
+                              : 'Failed to delete memory'
+                        )
+                     );
+                     setConfirmDeleteMarkdown(false);
+                  });
+            }}
+            onCancel={() => setConfirmDeleteMarkdown(false)}
          />
       </div>
    );
