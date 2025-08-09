@@ -54,11 +54,11 @@ export const ImageViewer = ({
       >
          <button
             onClick={onClose}
-            className="absolute top-6 right-6 text-white/80 hover:text-white transition-all duration-200 p-3 rounded-full hover:bg-white/10 group"
+            className="absolute top-6 right-6 text-white/80 hover:text-white transition-all duration-200 p-3 rounded-full hover:bg-white/10 cursor-pointer"
             title="Close (Esc)"
          >
             <svg
-               className="w-8 h-8 transform group-hover:rotate-90 transition-transform duration-200"
+               className="w-8 h-8"
                fill="none"
                stroke="currentColor"
                viewBox="0 0 24 24"
