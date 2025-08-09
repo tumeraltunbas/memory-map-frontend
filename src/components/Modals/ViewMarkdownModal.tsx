@@ -29,6 +29,9 @@ export const ViewMarkdownModal = ({
       url: string;
    } | null>(null);
    const [selectedNote, setSelectedNote] = useState<number | null>(null);
+   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+   const [editNoteText, setEditNoteText] = useState<string>('');
+   const [updatingNote, setUpdatingNote] = useState<boolean>(false);
    const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState<
       string | null
    >(null);
@@ -164,6 +167,34 @@ export const ViewMarkdownModal = ({
       }
    };
 
+   const handleUpdateNote = async (noteId: string) => {
+      if (!editNoteText.trim()) return;
+      setUpdatingNote(true);
+      dispatch(setLoading(true));
+      try {
+         await markdownAPI.updateMarkdownNote(noteId, {
+            markdownId,
+            text: editNoteText.slice(0, 1500),
+         });
+         setMarkdown((prev) => {
+            if (!prev) return prev;
+            return {
+               ...prev,
+               notes: prev.notes.map((n) =>
+                  n.id === noteId ? { ...n, text: editNoteText } : n
+               ),
+            };
+         });
+         setEditingNoteId(null);
+         setEditNoteText('');
+      } catch (error) {
+         // interceptor toasts
+      } finally {
+         setUpdatingNote(false);
+         dispatch(setLoading(false));
+      }
+   };
+
    const uploadFiles = async (filesToUpload: File[]) => {
       if (!filesToUpload.length) return;
       setIsUploadingPhotos(true);
@@ -183,7 +214,10 @@ export const ViewMarkdownModal = ({
       setSavingNote(true);
       dispatch(setLoading(true));
       try {
-         await markdownAPI.createMarkdownNote({ markdownId, text: noteText });
+         await markdownAPI.createMarkdownNote({
+            markdownId,
+            text: noteText.slice(0, 1500),
+         });
          await refreshMarkdown();
          setNoteText('');
          setShowAddNote(false);
@@ -417,8 +451,22 @@ export const ViewMarkdownModal = ({
                            value={noteText}
                            onChange={(e) => setNoteText(e.target.value)}
                            placeholder="Write your memory here..."
-                           className="w-full min-h-28 p-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#9E7B9B] focus:border-transparent"
+                           className={`w-full min-h-28 p-3 border rounded-md focus:ring-2 focus:border-transparent ${
+                              noteText.length >= 1500
+                                 ? 'border-red-300 focus:ring-red-500'
+                                 : 'border-gray-200 focus:ring-[#9E7B9B]'
+                           }`}
+                           maxLength={1500}
                         />
+                        <div
+                           className={`mt-1 text-xs text-right ${
+                              noteText.length >= 1500
+                                 ? 'text-red-600'
+                                 : 'text-gray-400'
+                           }`}
+                        >
+                           {noteText.length}/1500
+                        </div>
                         <div className="flex justify-end mt-3">
                            <button
                               onClick={handleAddNote}
@@ -466,25 +514,121 @@ export const ViewMarkdownModal = ({
                               className={`p-4 bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer ${selectedNote === index ? 'ring-1 ring-gray-300' : 'hover:bg-gray-100'}`}
                            >
                               <div className="flex items-start justify-between gap-4">
-                                 <p
-                                    className={`text-gray-700 leading-relaxed flex-1 ${selectedNote === index ? 'whitespace-pre-wrap' : 'line-clamp-1'}`}
-                                 >
-                                    {selectedNote === index
-                                       ? note.text
-                                       : getNotePreview(note.text)}
-                                 </p>
-                                 <div className="flex items-center gap-2">
-                                    <button
-                                       onClick={(e) => {
-                                          e.stopPropagation();
-                                          prevSelectedNoteRef.current =
-                                             selectedNote;
-                                          setConfirmDeleteNoteId(note.id);
-                                       }}
-                                       className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 cursor-pointer"
-                                    >
+                                 <div className="flex-1">
+                                    {editingNoteId === note.id ? (
+                                       <div>
+                                          <textarea
+                                             className={`w-full min-h-28 p-3 border rounded-md focus:ring-2 focus:border-transparent ${
+                                                editNoteText.length >= 1500
+                                                   ? 'border-red-300 focus:ring-red-500'
+                                                   : 'border-gray-200 focus:ring-[#9E7B9B]'
+                                             }`}
+                                             value={editNoteText}
+                                             onChange={(e) =>
+                                                setEditNoteText(e.target.value)
+                                             }
+                                             onClick={(e) =>
+                                                e.stopPropagation()
+                                             }
+                                             maxLength={1500}
+                                          />
+                                          <div
+                                             className={`mt-1 text-xs text-right ${
+                                                editNoteText.length >= 1500
+                                                   ? 'text-red-600'
+                                                   : 'text-gray-400'
+                                             }`}
+                                          >
+                                             {editNoteText.length}/1500
+                                          </div>
+                                          <div className="mt-2 flex gap-2 justify-end">
+                                             <button
+                                                className="px-3 py-1.5 rounded-md text-sm bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                                onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setEditingNoteId(null);
+                                                   setEditNoteText('');
+                                                }}
+                                             >
+                                                Cancel
+                                             </button>
+                                             <button
+                                                className={`px-3 py-1.5 rounded-md text-sm text-white ${!editNoteText.trim() || updatingNote ? 'bg-[#9E7B9B]/60 cursor-not-allowed' : 'bg-[#9E7B9B] hover:bg-[#8B6B8B]'}`}
+                                                disabled={
+                                                   !editNoteText.trim() ||
+                                                   updatingNote
+                                                }
+                                                onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   handleUpdateNote(note.id);
+                                                }}
+                                             >
+                                                {updatingNote
+                                                   ? 'Saving...'
+                                                   : 'Save'}
+                                             </button>
+                                          </div>
+                                       </div>
+                                    ) : (
+                                       <p
+                                          className={`text-gray-700 leading-relaxed ${selectedNote === index ? 'whitespace-pre-wrap' : 'line-clamp-1'}`}
+                                       >
+                                          {selectedNote === index
+                                             ? note.text
+                                             : getNotePreview(note.text)}
+                                       </p>
+                                    )}
+                                 </div>
+                                 {editingNoteId !== note.id && (
+                                    <div className="flex items-center gap-2">
+                                       <button
+                                          onClick={(e) => {
+                                             e.stopPropagation();
+                                             setEditingNoteId(note.id);
+                                             setEditNoteText(note.text);
+                                             setSelectedNote(index);
+                                          }}
+                                          className="p-1 rounded-full text-gray-400 hover:text-[#9E7B9B] hover:bg-gray-50 transition-all duration-200 cursor-pointer"
+                                       >
+                                          <svg
+                                             className="w-4 h-4"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             viewBox="0 0 24 24"
+                                          >
+                                             <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M11 5h2m-5.5 12.5L5 19l1.5-3.5L16 6l3 3-9.5 9.5z"
+                                             />
+                                          </svg>
+                                       </button>
+                                       <button
+                                          onClick={(e) => {
+                                             e.stopPropagation();
+                                             prevSelectedNoteRef.current =
+                                                selectedNote;
+                                             setConfirmDeleteNoteId(note.id);
+                                          }}
+                                          className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 cursor-pointer"
+                                       >
+                                          <svg
+                                             className="w-4 h-4"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             viewBox="0 0 24 24"
+                                          >
+                                             <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                             />
+                                          </svg>
+                                       </button>
                                        <svg
-                                          className="w-4 h-4"
+                                          className={`w-5 h-5 text-gray-400 shrink-0 transform transition-transform duration-200 ${selectedNote === index ? 'rotate-180' : ''}`}
                                           fill="none"
                                           stroke="currentColor"
                                           viewBox="0 0 24 24"
@@ -493,24 +637,11 @@ export const ViewMarkdownModal = ({
                                              strokeLinecap="round"
                                              strokeLinejoin="round"
                                              strokeWidth={2}
-                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                             d="M19 9l-7 7-7-7"
                                           />
                                        </svg>
-                                    </button>
-                                    <svg
-                                       className={`w-5 h-5 text-gray-400 shrink-0 transform transition-transform duration-200 ${selectedNote === index ? 'rotate-180' : ''}`}
-                                       fill="none"
-                                       stroke="currentColor"
-                                       viewBox="0 0 24 24"
-                                    >
-                                       <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M19 9l-7 7-7-7"
-                                       />
-                                    </svg>
-                                 </div>
+                                    </div>
+                                 )}
 
                                  {/* Confirm modal rendered once below */}
                               </div>
