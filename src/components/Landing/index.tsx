@@ -1,5 +1,4 @@
 import { HeroSection } from './HeroSection';
-import { Footer } from './Footer';
 import { LandingHeader } from './LandingHeader';
 
 export const Landing = () => {
@@ -9,7 +8,6 @@ export const Landing = () => {
          <main>
             <HeroSection />
          </main>
-         <Footer />
       </div>
    );
 };

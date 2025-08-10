@@ -1,3 +1,5 @@
+import { IconWorld } from '@tabler/icons-react';
+
 interface AuthLayoutProps {
    children: React.ReactNode;
    title: string;
@@ -8,9 +10,6 @@ export const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
    return (
       <div className="min-h-screen bg-gradient-to-br from-[#FAF7FB] via-[#F7ECF6] to-[#F3E7F2] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
          <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <h1 className="text-3xl font-bold text-center text-[#2D3748] mb-2">
-               Memory Map
-            </h1>
             <h2 className="mt-6 text-2xl font-semibold text-center text-gray-900">
                {title}
             </h2>

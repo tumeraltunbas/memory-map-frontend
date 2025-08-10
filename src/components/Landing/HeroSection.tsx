@@ -42,7 +42,7 @@ export const HeroSection = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="bg-[#9E7B9B] text-white px-8 py-4 rounded-lg text-lg font-medium 
-                           shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+                           shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center cursor-pointer"
                      >
                         Start Mapping
                         <svg
@@ -61,7 +61,7 @@ export const HeroSection = () => {
                      </motion.button>
                   </div>
 
-                  <div className="mt-12 flex items-center gap-8">
+                  {/* <div className="mt-12 flex items-center gap-8">
                      <div>
                         <div className="text-2xl font-bold text-[#2D3748]">
                            2,000+
@@ -74,7 +74,7 @@ export const HeroSection = () => {
                         </div>
                         <div className="text-[#4A5568]">Memories Mapped</div>
                      </div>
-                  </div>
+                  </div> */}
                </motion.div>
 
                <motion.div
@@ -142,8 +142,8 @@ export const HeroSection = () => {
                            className="absolute left-20 bottom-10 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[2deg]"
                         >
                            <img
-                              src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=60"
-                              alt="Friends on a trip"
+                              src="https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=600&q=60"
+                              alt="city view"
                               className="w-full h-full object-cover"
                               loading="lazy"
                            />
