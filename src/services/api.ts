@@ -16,14 +16,22 @@ api.interceptors.response.use(
       const message =
          error.response?.data?.message || error.message || 'Request failed';
 
-      toast.error(message);
-
       if (code === 'authorization_error') {
          localStorage.removeItem('access-token');
          localStorage.setItem('isAuthenticated', 'false');
-         toast.error('Your session has expired. Please log in again.');
+         localStorage.setItem(
+            'post-login-toast',
+            JSON.stringify({
+               type: 'error',
+               message: 'Your session has expired. Please log in again.',
+            })
+         );
          window.location.href = '/login';
+         return Promise.reject(error);
       }
+
+      toast.error(message);
+
       return Promise.reject(error);
    }
 );
