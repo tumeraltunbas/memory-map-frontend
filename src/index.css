@@ -1,1 +1,18 @@
 @import 'tailwindcss';
+
+/* Hide native password reveal/clear icons to avoid duplicates with extensions or custom UI */
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+   display: none;
+}
+
+input[type='password']::-webkit-credentials-auto-fill-button {
+   visibility: hidden;
+   display: none;
+   pointer-events: none;
+}
+
+/* Safari/WebKit decoration container (reveals/clear) */
+input[type='password']::-webkit-textfield-decoration-container {
+   display: none;
+}

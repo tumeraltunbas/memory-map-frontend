@@ -7,6 +7,8 @@ import { Settings } from './components/Settings';
 import { Profile } from './components/Profile';
 import { Login } from './components/Auth/Login';
 import { Register } from './components/Auth/Register';
+import { ForgotPassword } from './components/Auth/ForgotPassword';
+import { ResetPassword } from './components/Auth/ResetPassword';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { CursorProvider } from './contexts/CursorContext';
 import { ToastContainer } from 'react-toastify';
@@ -33,6 +35,8 @@ function App() {
                <Route path="/" element={<Landing />} />
                <Route path="/login" element={<Login />} />
                <Route path="/register" element={<Register />} />
+               <Route path="/forgot-password" element={<ForgotPassword />} />
+               <Route path="/reset-password" element={<ResetPassword />} />
 
                <Route
                   path="/map"

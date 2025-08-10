@@ -71,6 +71,19 @@ export const authAPI = {
       const response = await api.get('/users/profile');
       return response.data;
    },
+
+   forgotPassword: async (email: string) => {
+      const response = await api.post('/auth/password/forgot', { email });
+      return response.data;
+   },
+
+   resetPassword: async (password: string, resetPasswordToken: string) => {
+      const response = await api.post(
+         `/auth/password/reset?resetPasswordToken=${encodeURIComponent(resetPasswordToken)}`,
+         { password }
+      );
+      return response.data;
+   },
 };
 
 export default api;
