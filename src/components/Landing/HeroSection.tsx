@@ -83,17 +83,79 @@ export const HeroSection = () => {
                   transition={{ delay: 0.3, duration: 0.8 }}
                   className="relative"
                >
-                  <div className="relative">
-                     <img
-                        src="/hero-illustration.svg"
-                        alt="Memory Map Preview"
-                        className="w-full rounded-lg shadow-2xl"
-                     />
+                  <div className="relative rounded-2xl shadow-2xl overflow-hidden bg-white">
+                     {/* Soft map-like background */}
+                     <svg
+                        className="absolute inset-0 w-full h-full text-gray-200"
+                        viewBox="0 0 800 600"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden
+                     >
+                        <rect width="800" height="600" fill="#F8F9FA" />
+                        <path
+                           d="M100,100 Q400,50 700,150 T800,300"
+                           stroke="#E9ECEF"
+                           strokeWidth="2"
+                        />
+                        <path
+                           d="M0,200 Q300,250 600,150 T800,400"
+                           stroke="#E9ECEF"
+                           strokeWidth="2"
+                        />
+                     </svg>
+
+                     {/* Collage photos */}
+                     <div className="relative aspect-[4/3]">
+                        <motion.div
+                           initial={{ y: 20, opacity: 0 }}
+                           animate={{ y: 0, opacity: 1 }}
+                           transition={{ delay: 0.25, duration: 0.6 }}
+                           className="absolute left-10 top-10 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[-6deg]"
+                        >
+                           <img
+                              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=60"
+                              alt="Sunset over mountains"
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                           />
+                        </motion.div>
+
+                        <motion.div
+                           initial={{ y: 30, opacity: 0 }}
+                           animate={{ y: 0, opacity: 1 }}
+                           transition={{ delay: 0.35, duration: 0.6 }}
+                           className="absolute right-12 top-24 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[5deg]"
+                        >
+                           <img
+                              src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=60"
+                              alt="Hikers by lake"
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                           />
+                        </motion.div>
+
+                        <motion.div
+                           initial={{ y: 40, opacity: 0 }}
+                           animate={{ y: 0, opacity: 1 }}
+                           transition={{ delay: 0.45, duration: 0.6 }}
+                           className="absolute left-20 bottom-10 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[2deg]"
+                        >
+                           <img
+                              src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=60"
+                              alt="Friends on a trip"
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                           />
+                        </motion.div>
+                     </div>
+
+                     {/* Floating toast */}
                      <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.6, duration: 0.5 }}
-                        className="absolute top-[-20px] right-[-20px] bg-white p-4 rounded-lg shadow-lg"
+                        transition={{ delay: 0.7, duration: 0.4 }}
+                        className="absolute top-4 right-4 bg-white p-3 rounded-lg shadow-lg"
                      >
                         <div className="flex items-center gap-3">
                            <div className="w-2 h-2 rounded-full bg-[#9E7B9B]" />
