@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import type { MapLocation } from '../MapHeader';
 import { useCursor } from '../../contexts/CursorContext';
-import type { MarkdownResponse } from '../../services/markdownApi';
+import type { MarkdownResponse } from '../../types';
 import {
    addMarkdown,
    setLoading,

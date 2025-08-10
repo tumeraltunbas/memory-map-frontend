@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { setUser } from '../../stores/slices/userSlice';
-import { authAPI } from '../../services/api';
+import { authAPI } from '../../services/authApi';
 import { AuthLayout } from '../AuthLayout';
 
 export const Register = () => {

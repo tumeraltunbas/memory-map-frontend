@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
+import { authAPI } from '../../services/authApi';
 import { logout } from '../../stores/slices/userSlice';
 import { useDispatch } from 'react-redux';
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';

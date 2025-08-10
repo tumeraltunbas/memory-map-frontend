@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { markdownAPI } from '../../services/markdownApi';
-import type { MarkdownResponse } from '../../services/markdownApi';
+import type { MarkdownResponse } from '../../types';
 import { setError, setLoading } from '../../stores/slices/markdownsSlice';
 import { ImageViewer } from './ImageViewer';
 import { ConfirmModal } from './ConfirmModal';

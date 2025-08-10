@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../stores/store';
 import { AccountLayout } from '../AccountLayout';
-import { authAPI } from '../../services/api';
+import { authAPI } from '../../services/authApi';
 
 export const Settings = () => {
    useSelector((state: RootState) => state.user.user); // keep store subscription in case of future needs

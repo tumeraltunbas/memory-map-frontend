@@ -1,63 +1,9 @@
 import { toast } from 'react-toastify';
-interface SearchSuggestion {
-   name: string;
-   mapbox_id: string;
-   feature_type: string;
-   address?: string;
-   full_address?: string;
-   place_formatted: string;
-   context?: {
-      country?: {
-         name?: string;
-         country_code?: string;
-         country_code_alpha_3?: string;
-      };
-      region?: {
-         name?: string;
-         region_code?: string;
-      };
-      place?: {
-         name?: string;
-      };
-      postcode?: {
-         name?: string;
-      };
-      street?: {
-         name?: string;
-      };
-   };
-   language: string;
-   maki: string;
-   poi_category?: string[];
-   distance: number;
-   coordinates?: {
-      longitude: number;
-      latitude: number;
-   };
-}
-
-interface MapboxSearchResponse {
-   suggestions: SearchSuggestion[];
-}
-
-interface RetrieveResponse {
-   type: string;
-   features: Array<{
-      type: string;
-      geometry: {
-         coordinates: [number, number]; // [longitude, latitude]
-         type: string;
-      };
-      properties: {
-         name: string;
-         mapbox_id: string;
-         coordinates: {
-            latitude: number;
-            longitude: number;
-         };
-      };
-   }>;
-}
+import type {
+   MapboxSearchResponse,
+   RetrieveResponse,
+   SearchSuggestion,
+} from '../types';
 
 export const mapboxSearchAPI = {
    retrieve: async (

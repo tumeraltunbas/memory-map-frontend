@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../stores/store';
 import { setLoading } from '../../stores/slices/userSlice';
-import { authAPI, type UserProfileResponse } from '../../services/api';
+import { authAPI } from '../../services/authApi';
+import type { UserProfileResponse } from '../../types';
 
 import { AccountLayout } from '../AccountLayout';
 import { IconBookmark, IconBuilding, IconWorld } from '@tabler/icons-react';

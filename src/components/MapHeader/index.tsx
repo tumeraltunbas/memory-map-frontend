@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../stores/slices/userSlice';
-import { authAPI } from '../../services/api';
+import { authAPI } from '../../services/authApi';
 import { useCursor } from '../../contexts/CursorContext';
 import { mapboxSearchAPI as searchAPI } from '../../services/mapboxSearchApi';
 

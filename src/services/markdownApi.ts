@@ -1,42 +1,10 @@
 import api from './api';
-
-export interface GeoLocation {
-   x: number;
-   y: number;
-}
-
-export interface MarkdownResponse {
-   markdownId: string;
-   title: string;
-   geoLocation: GeoLocation;
-   photos: { id: string; url: string }[]; // S3 presigned URLs
-   notes: { id: string; text: string }[];
-   createdAt: string;
-   updatedAt: string;
-}
-
-export interface GetMarkdownsResponse {
-   markdowns: MarkdownResponse[];
-}
-
-export interface CreateMarkdownRequest {
-   title: string;
-   coordinates: [number, number];
-}
-
-export interface UpdateMarkdownRequest {
-   title: string;
-}
-
-export interface CreateMarkdownNoteRequest {
-   markdownId: string;
-   text: string;
-}
-
-export interface UpdateMarkdownNoteRequest {
-   markdownId: string;
-   text: string;
-}
+import type {
+   CreateMarkdownNoteRequest,
+   CreateMarkdownRequest,
+   UpdateMarkdownNoteRequest,
+   UpdateMarkdownRequest,
+} from '../types';
 
 export const markdownAPI = {
    createMarkdown: async (data: CreateMarkdownRequest) => {
