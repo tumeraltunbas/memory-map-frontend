@@ -456,6 +456,34 @@ export const ViewMarkdownModal = ({
                         Photos
                      </h3>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {isUploadingPhotos && (
+                           <div className="col-span-2 md:col-span-3">
+                              <div className="w-full h-24 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200">
+                                 <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                    <svg
+                                       className="animate-spin h-5 w-5 text-gray-400"
+                                       viewBox="0 0 24 24"
+                                       fill="none"
+                                       stroke="currentColor"
+                                    >
+                                       <circle
+                                          className="opacity-25"
+                                          cx="12"
+                                          cy="12"
+                                          r="10"
+                                          strokeWidth="4"
+                                       ></circle>
+                                       <path
+                                          className="opacity-75"
+                                          d="M4 12a8 8 0 018-8"
+                                          strokeWidth="4"
+                                       ></path>
+                                    </svg>
+                                    Uploading photos...
+                                 </div>
+                              </div>
+                           </div>
+                        )}
                         {/* Empty photo tile - label triggers input */}
                         <label className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-[#9E7B9B] transition-colors">
                            <input
