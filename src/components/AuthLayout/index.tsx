@@ -1,5 +1,3 @@
-import { IconWorld } from '@tabler/icons-react';
-
 interface AuthLayoutProps {
    children: React.ReactNode;
    title: string;
