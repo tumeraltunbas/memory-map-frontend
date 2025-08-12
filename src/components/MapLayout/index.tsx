@@ -1,7 +1,7 @@
 import { MapHeader } from '../MapHeader';
 import { Map } from '../Map';
 import '../../styles/cursor.css';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import type { MapLocation } from '../MapHeader';
 
 export const MapLayout = () => {
