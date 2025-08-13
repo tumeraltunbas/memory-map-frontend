@@ -16,12 +16,13 @@ export const HeroSection = () => {
             <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#9E7B9B] blur-[120px] opacity-20" />
          </div>
 
-         <div className="max-w-7xl mx-auto px-4 md:px-8 h-screen flex items-center relative z-10">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+         <div className="max-w-7xl mx-auto px-4 md:px-8 min-h-screen md:h-screen h-auto py-16 md:py-0 flex items-center relative z-10 pt-24 md:pt-0">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
+                  className="order-2 md:order-1"
                >
                   <h1 className="text-4xl md:text-7xl font-bold text-[#2D3748] mb-6 leading-tight">
                      Your Journey, Beautifully
@@ -81,9 +82,9 @@ export const HeroSection = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.8 }}
-                  className="relative"
+                  className="relative w-full max-w-md mx-auto md:max-w-none order-1 md:order-2"
                >
-                  <div className="relative rounded-2xl shadow-2xl overflow-hidden bg-white">
+                  <div className="relative w-full rounded-2xl shadow-2xl overflow-hidden bg-white">
                      {/* Soft map-like background */}
                      <svg
                         className="absolute inset-0 w-full h-full text-gray-200"
@@ -106,12 +107,12 @@ export const HeroSection = () => {
                      </svg>
 
                      {/* Collage photos */}
-                     <div className="relative aspect-[4/3]">
+                     <div className="relative aspect-[4/3] z-10">
                         <motion.div
                            initial={{ y: 20, opacity: 0 }}
                            animate={{ y: 0, opacity: 1 }}
                            transition={{ delay: 0.25, duration: 0.6 }}
-                           className="absolute left-10 top-10 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[-6deg]"
+                           className="absolute left-4 sm:left-10 top-6 sm:top-10 w-28 h-28 sm:w-40 sm:h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[-6deg]"
                         >
                            <img
                               src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=60"
@@ -125,7 +126,7 @@ export const HeroSection = () => {
                            initial={{ y: 30, opacity: 0 }}
                            animate={{ y: 0, opacity: 1 }}
                            transition={{ delay: 0.35, duration: 0.6 }}
-                           className="absolute right-12 top-24 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[5deg]"
+                           className="absolute right-4 sm:right-12 top-16 sm:top-24 w-28 h-28 sm:w-40 sm:h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[5deg]"
                         >
                            <img
                               src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=60"
@@ -139,7 +140,7 @@ export const HeroSection = () => {
                            initial={{ y: 40, opacity: 0 }}
                            animate={{ y: 0, opacity: 1 }}
                            transition={{ delay: 0.45, duration: 0.6 }}
-                           className="absolute left-20 bottom-10 w-40 h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[2deg]"
+                           className="absolute left-8 sm:left-20 bottom-6 sm:bottom-10 w-28 h-28 sm:w-40 sm:h-40 bg-white rounded-lg border border-[#DED3D7] shadow-md overflow-hidden rotate-[2deg]"
                         >
                            <img
                               src="https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=600&q=60"

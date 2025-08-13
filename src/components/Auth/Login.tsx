@@ -10,6 +10,7 @@ export const Login = () => {
    const navigate = useNavigate();
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
+   const [showPassword, setShowPassword] = useState<boolean>(false);
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -44,7 +45,7 @@ export const Login = () => {
                      required
                      value={email}
                      onChange={(e) => setEmail(e.target.value)}
-                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#9E7B9B] focus:border-[#9E7B9B] sm:text-sm"
+                     className="appearance-none block w-full h-11 px-3 border border-gray-300 rounded-md shadow-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-[#9E7B9B] focus:border-[#9E7B9B] sm:text-sm"
                   />
                </div>
             </div>
@@ -56,17 +57,64 @@ export const Login = () => {
                >
                   Password
                </label>
-               <div className="mt-1">
+               <div className="mt-1 relative">
                   <input
                      id="password"
                      name="password"
-                     type="password"
+                     type={showPassword ? 'text' : 'password'}
                      autoComplete="current-password"
                      required
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#9E7B9B] focus:border-[#9E7B9B] sm:text-sm"
+                     className="appearance-none block w-full h-11 pl-3 pr-10 border border-gray-300 rounded-md shadow-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-[#9E7B9B] focus:border-[#9E7B9B] sm:text-sm [caret-color:#4A5568]"
+                     inputMode="text"
                   />
+                  <button
+                     type="button"
+                     onClick={() => setShowPassword((v) => !v)}
+                     className="absolute inset-y-0 right-2 my-auto p-2 text-gray-400 hover:text-gray-600 rounded focus:outline-none cursor-pointer"
+                     aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                     }
+                     aria-pressed={showPassword}
+                  >
+                     {showPassword ? (
+                        <svg
+                           className="w-5 h-5"
+                           viewBox="0 0 24 24"
+                           fill="none"
+                           stroke="currentColor"
+                        >
+                           <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M13.875 18.825A10.05 10.05 0 0 1 12 19c-7 0-10-7-10-7a18.836 18.836 0 0 1 5.058-5.943m3.14-1.57A9.966 9.966 0 0 1 12 5c7 0 10 7 10 7a18.87 18.87 0 0 1-3.478 4.568M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                           />
+                           <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M3 3l18 18"
+                           />
+                        </svg>
+                     ) : (
+                        <svg
+                           className="w-5 h-5"
+                           viewBox="0 0 24 24"
+                           fill="none"
+                           stroke="currentColor"
+                        >
+                           <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"
+                           />
+                           <circle cx="12" cy="12" r="3" strokeWidth="2" />
+                        </svg>
+                     )}
+                  </button>
                </div>
             </div>
 

@@ -164,10 +164,10 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
 
    return (
       <header
-         className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-[100] bg-transparent"
+         className="fixed top-0 left-0 right-0 px-4 py-3 flex items-center gap-2 sm:gap-3 z-[100] bg-transparent"
          data-cursor-block="true"
       >
-         <div className="w-64">
+         <div className="flex-1 min-w-0">
             <div className="relative">
                <input
                   type="text"
@@ -282,7 +282,7 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
                )}
             </div>
          </div>
-         <div className="flex gap-3">
+         <div className="flex gap-2 sm:gap-3 flex-shrink-0">
             <div
                className="relative"
                ref={mapToolsRef}
@@ -290,13 +290,13 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
             >
                <button
                   onClick={() => setOpenMapTools(!openMapTools)}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-300 shadow-sm p-3 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center justify-center rounded-full border border-gray-300 shadow-sm p-2.5 md:p-3 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   aria-expanded={openMapTools}
                   aria-haspopup="true"
                >
                   {getMapToolIcon()}
                   <svg
-                     className={`ml-1.5 h-5 w-5 transition-transform duration-200 ${
+                     className={`ml-1.5 h-4 w-4 md:h-5 md:w-5 transition-transform duration-200 ${
                         openMapTools ? 'transform rotate-180' : ''
                      }`}
                      fill="none"
@@ -337,11 +337,11 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
             <div className="relative" ref={profileRef} data-cursor-block="true">
                <button
                   onClick={() => setOpenProfile(!openProfile)}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-300 shadow-sm p-3 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center justify-center rounded-full border border-gray-300 shadow-sm p-2.5 md:p-3 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   aria-expanded={openProfile}
                   aria-haspopup="true"
                >
-                  <IconUser className="w-5 h-5" />
+                  <IconUser className="w-4 h-4 md:w-5 md:h-5" />
                </button>
 
                {openProfile && (

@@ -12,7 +12,32 @@ input[type='password']::-webkit-credentials-auto-fill-button {
    pointer-events: none;
 }
 
-/* Safari/WebKit decoration container (reveals/clear) */
-input[type='password']::-webkit-textfield-decoration-container {
-   display: none;
+/* Safari/WebKit decoration container (reveals/clear)
+   Do not hide completely; hiding can break focus/tap on iOS Safari.
+   If duplicate icons appear in the future, consider more selective overrides. */
+/* input[type='password']::-webkit-textfield-decoration-container { display: none; } */
+
+/* iOS Safari: prevent translucent/gradient bleed and native styling */
+input,
+textarea,
+select {
+   -webkit-appearance: none;
+   appearance: none;
+   background-clip: padding-box;
+}
+
+/* Ensure solid background on text/password/email fields in WebKit */
+input[type='text'],
+input[type='password'],
+input[type='email'] {
+   background-color: #ffffff;
+}
+
+/* iOS Safari autofill color and background fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+   -webkit-text-fill-color: #1f2937;
+   box-shadow: 0 0 0px 1000px #ffffff inset;
+   transition: background-color 9999s ease-in-out 0s;
 }

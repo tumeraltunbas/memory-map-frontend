@@ -57,11 +57,11 @@ export const Profile = () => {
 
             <div className="py-6">
                <div className="flex items-center space-x-6">
-                  <div className="h-24 w-24 bg-[#9E7B9B] rounded-full flex items-center justify-center text-white text-3xl font-medium">
+                  <div className="h-20 w-20 sm:h-24 sm:w-24 bg-[#9E7B9B] rounded-full flex items-center justify-center text-white text-3xl font-medium flex-shrink-0">
                      {profile?.user.email?.charAt(0)?.toUpperCase() || '?'}
                   </div>
-                  <div>
-                     <h3 className="text-xl font-medium text-gray-900">
+                  <div className="min-w-0">
+                     <h3 className="text-sm sm:text-xl font-medium text-gray-900 break-words leading-snug">
                         {profile?.user?.email || 'Loading...'}
                      </h3>
                      <p className="text-sm text-gray-500">
@@ -83,7 +83,7 @@ export const Profile = () => {
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                      Your Activity
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                      <div className="bg-[#F7FAFC] rounded-lg p-5">
                         <div className="text-sm text-gray-500 mt-1">
                            <div className="flex items-center gap-1">
