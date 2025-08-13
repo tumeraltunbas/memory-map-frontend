@@ -11,6 +11,7 @@ export const Register = () => {
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
    const [showPassword, setShowPassword] = useState<boolean>(false);
+   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
    const isPasswordValid = passwordRegex.test(password);
@@ -20,6 +21,7 @@ export const Register = () => {
       if (!isPasswordValid) return;
 
       try {
+         setIsSubmitting(true);
          await authAPI.register(email, password);
 
          // Get user details after successful registration
@@ -27,7 +29,9 @@ export const Register = () => {
          dispatch(setUser(userData));
 
          navigate('/map');
-      } catch (err) {}
+      } catch (err) {
+         setIsSubmitting(false);
+      }
    };
 
    return (
@@ -138,14 +142,23 @@ export const Register = () => {
             <div>
                <button
                   type="submit"
-                  disabled={!isPasswordValid}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                     !isPasswordValid
+                  disabled={!isPasswordValid || isSubmitting}
+                  className={`w-full inline-flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                     !isPasswordValid || isSubmitting
                         ? 'bg-[#9E7B9B]/60 cursor-not-allowed'
                         : 'bg-[#9E7B9B] hover:bg-[#8B6B8B] focus:ring-[#9E7B9B]'
                   }`}
+                  aria-busy={isSubmitting}
                >
-                  Create Account
+                  {isSubmitting ? (
+                     <>
+                        <span className="sr-only">Creating account</span>
+                        <span className="mr-2">Creating account</span>
+                        <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                     </>
+                  ) : (
+                     'Create Account'
+                  )}
                </button>
             </div>
 

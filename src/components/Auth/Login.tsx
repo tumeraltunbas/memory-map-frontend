@@ -11,16 +11,20 @@ export const Login = () => {
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
    const [showPassword, setShowPassword] = useState<boolean>(false);
+   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
 
       try {
+         setIsSubmitting(true);
          await authAPI.login(email, password);
          const userData = await authAPI.getCurrentUser();
          dispatch(setUser(userData));
          navigate('/map');
-      } catch (err) {}
+      } catch (err) {
+         setIsSubmitting(false);
+      }
    };
 
    return (
@@ -132,9 +136,23 @@ export const Login = () => {
             <div>
                <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#9E7B9B] hover:bg-[#8B6B8B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9E7B9B]"
+                  disabled={isSubmitting}
+                  className={`w-full inline-flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                     isSubmitting
+                        ? 'bg-[#9E7B9B]/70 cursor-not-allowed'
+                        : 'bg-[#9E7B9B] hover:bg-[#8B6B8B] focus:ring-[#9E7B9B]'
+                  }`}
+                  aria-busy={isSubmitting}
                >
-                  Sign in
+                  {isSubmitting ? (
+                     <>
+                        <span className="sr-only">Signing in</span>
+                        <span className="mr-2">Signing in</span>
+                        <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                     </>
+                  ) : (
+                     'Sign in'
+                  )}
                </button>
             </div>
 
