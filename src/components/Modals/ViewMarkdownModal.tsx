@@ -252,7 +252,20 @@ export const ViewMarkdownModal = ({
       }
    };
 
-   if (!isOpen || !markdown) return null;
+   if (!isOpen) return null;
+
+   if (!markdown) {
+      return (
+         <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-[1000]">
+            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-sm p-8 flex items-center justify-center">
+               <div className="flex items-center gap-3 text-gray-600">
+                  <span className="h-5 w-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                  <span className="text-sm">Loading memory...</span>
+               </div>
+            </div>
+         </div>
+      );
+   }
 
    return (
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-[1000]">

@@ -119,6 +119,8 @@ export const Map = ({ targetLocation }: MapProps) => {
             markerElement.addEventListener('click', async (e) => {
                e.stopPropagation();
                try {
+                  setIsViewModalOpen(true);
+                  setActiveMarkerId(markdownId);
                   const markdownDetails =
                      await markdownAPI.getSingleMarkdown(markdownId);
                   dispatch(
@@ -128,8 +130,6 @@ export const Map = ({ targetLocation }: MapProps) => {
                         updatedAt: new Date(markdownDetails.updatedAt),
                      })
                   );
-                  setActiveMarkerId(markdownId);
-                  setIsViewModalOpen(true);
                } catch (error) {
                   console.error('Error fetching markdown details:', error);
                   dispatch(
@@ -152,6 +152,8 @@ export const Map = ({ targetLocation }: MapProps) => {
 
             markersRef.current[markdownId] = marker;
 
+            setIsViewModalOpen(true);
+            setActiveMarkerId(markdownId);
             const markdownDetails =
                await markdownAPI.getSingleMarkdown(markdownId);
 
@@ -163,8 +165,7 @@ export const Map = ({ targetLocation }: MapProps) => {
                })
             );
 
-            setActiveMarkerId(markdownId);
-            setIsViewModalOpen(true);
+            // modal already open; content will render once data arrives
          } catch (error) {
             console.error('Error creating markdown:', error);
             dispatch(
@@ -235,6 +236,8 @@ export const Map = ({ targetLocation }: MapProps) => {
                markerElement.addEventListener('click', async (e) => {
                   e.stopPropagation();
                   try {
+                     setIsViewModalOpen(true);
+                     setActiveMarkerId(markerId);
                      const markdownDetails =
                         await markdownAPI.getSingleMarkdown(markerId);
                      dispatch(
@@ -244,8 +247,6 @@ export const Map = ({ targetLocation }: MapProps) => {
                            updatedAt: new Date(markdownDetails.updatedAt),
                         })
                      );
-                     setActiveMarkerId(markerId);
-                     setIsViewModalOpen(true);
                   } catch (error) {
                      console.error('Error fetching markdown details:', error);
                      dispatch(
