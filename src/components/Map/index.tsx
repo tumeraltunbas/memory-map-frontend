@@ -319,6 +319,30 @@ export const Map = ({ targetLocation, onLoadingChange }: MapProps) => {
             };
             map.on('click', 'markdowns-layer', handleClick);
             map.on('click', 'markdowns-circle', handleClick);
+
+            // Add cursor change on hover
+            map.on('mouseenter', 'markdowns-layer', () => {
+               map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'markdowns-layer', () => {
+               map.getCanvas().style.cursor =
+                  cursorType === 'hand'
+                     ? 'grab'
+                     : cursorType === 'location'
+                       ? 'none'
+                       : 'default';
+            });
+            map.on('mouseenter', 'markdowns-circle', () => {
+               map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'markdowns-circle', () => {
+               map.getCanvas().style.cursor =
+                  cursorType === 'hand'
+                     ? 'grab'
+                     : cursorType === 'location'
+                       ? 'none'
+                       : 'default';
+            });
          }
       });
 
@@ -422,6 +446,30 @@ export const Map = ({ targetLocation, onLoadingChange }: MapProps) => {
             };
             map.on('click', 'markdowns-layer', handleClick);
             map.on('click', 'markdowns-circle', handleClick);
+
+            // Add cursor change on hover
+            map.on('mouseenter', 'markdowns-layer', () => {
+               map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'markdowns-layer', () => {
+               map.getCanvas().style.cursor =
+                  cursorType === 'hand'
+                     ? 'grab'
+                     : cursorType === 'location'
+                       ? 'none'
+                       : 'default';
+            });
+            map.on('mouseenter', 'markdowns-circle', () => {
+               map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'markdowns-circle', () => {
+               map.getCanvas().style.cursor =
+                  cursorType === 'hand'
+                     ? 'grab'
+                     : cursorType === 'location'
+                       ? 'none'
+                       : 'default';
+            });
          } else {
             const src = map.getSource('markdowns') as
                | mapboxgl.GeoJSONSource
