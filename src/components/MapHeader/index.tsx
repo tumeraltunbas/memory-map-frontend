@@ -164,10 +164,10 @@ export const MapHeader = ({ onLocationSelect }: MapHeaderProps) => {
 
    return (
       <header
-         className="fixed top-0 left-0 right-0 px-4 py-3 flex items-center gap-2 sm:gap-3 z-[100] bg-transparent"
+         className="fixed top-0 left-0 right-0 px-4 py-3 flex items-center justify-between gap-2 sm:gap-3 z-[100] bg-transparent"
          data-cursor-block="true"
       >
-         <div className="flex-1 min-w-0">
+         <div className="flex-1 min-w-0 max-w-2xl md:max-w-sm lg:max-w-sm">
             <div className="relative">
                <input
                   type="text"
