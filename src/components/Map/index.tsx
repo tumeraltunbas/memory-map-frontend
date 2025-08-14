@@ -590,13 +590,23 @@ export const Map = ({ targetLocation, onLoadingChange }: MapProps) => {
             markdownId={activeMarkerId || ''}
             onDelete={() => {
                if (!activeMarkerId) return;
-               // Remove from GeoJSON so layer updates immediately
+
+               // Marker'ı haritadan kaldır
+               const marker = markersRef.current[activeMarkerId];
+               if (marker) {
+                  marker.remove(); // Haritadan kaldır
+                  delete markersRef.current[activeMarkerId]; // Referansı temizle
+               }
+
+               // GeoJSON'dan kaldır
                setGeoJsonData((prev) => ({
                   type: 'FeatureCollection',
                   features: prev.features.filter(
                      (f) => (f.properties as any)?.markdownId !== activeMarkerId
                   ),
                }));
+
+               // Modalı kapat
                setIsViewModalOpen(false);
                setActiveMarkerId(null);
             }}
