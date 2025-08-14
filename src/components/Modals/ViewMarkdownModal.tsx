@@ -911,13 +911,14 @@ export const ViewMarkdownModal = ({
             confirmText="Delete"
             cancelText="Cancel"
             onConfirm={() => {
+               // Close confirm immediately so loading overlay is visible
+               setConfirmDeleteMarkdown(false);
                setIsDeletingMarkdown(true);
                dispatch(setLoading(true));
                markdownAPI
                   .deleteMarkdown(markdownId)
                   .then(() => {
                      dispatch(setLoading(false));
-                     setConfirmDeleteMarkdown(false);
                      onClose();
                      onDelete?.();
                   })
@@ -930,7 +931,6 @@ export const ViewMarkdownModal = ({
                               : 'Failed to delete memory'
                         )
                      );
-                     setConfirmDeleteMarkdown(false);
                   })
                   .finally(() => {
                      setIsDeletingMarkdown(false);
