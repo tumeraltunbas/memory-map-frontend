@@ -48,6 +48,9 @@ export const ViewMarkdownModal = ({
    const [savingNote, setSavingNote] = useState<boolean>(false);
    const [openMoreActions, setOpenMoreActions] = useState<boolean>(false);
    const moreMenuRef = useRef<HTMLDivElement | null>(null);
+   const [isDeletingMarkdown, setIsDeletingMarkdown] = useState<boolean>(false);
+   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+   const MAX_FILES_PER_UPLOAD = 10;
 
    interface Note {
       id: string;
@@ -221,10 +224,18 @@ export const ViewMarkdownModal = ({
 
    const uploadFiles = async (filesToUpload: File[]) => {
       if (!filesToUpload.length) return;
+      let files = filesToUpload;
+      if (filesToUpload.length > MAX_FILES_PER_UPLOAD) {
+         files = filesToUpload.slice(0, MAX_FILES_PER_UPLOAD);
+         setUploadNotice(
+            `You can upload up to ${MAX_FILES_PER_UPLOAD} photos at a time. Only the first ${MAX_FILES_PER_UPLOAD} will be uploaded.`
+         );
+         setTimeout(() => setUploadNotice(null), 3500);
+      }
       setIsUploadingPhotos(true);
       dispatch(setLoading(true));
       try {
-         await markdownAPI.uploadMarkdownPhotos(markdownId, filesToUpload);
+         await markdownAPI.uploadMarkdownPhotos(markdownId, files);
          await refreshMarkdown();
       } catch (error) {
       } finally {
@@ -270,6 +281,14 @@ export const ViewMarkdownModal = ({
    return (
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-[1000]">
          <div className="relative bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+            {isDeletingMarkdown && (
+               <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70">
+                  <div className="flex items-center gap-3 text-gray-700">
+                     <span className="h-5 w-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                     <span className="text-sm">Deleting memory...</span>
+                  </div>
+               </div>
+            )}
             {/* Close button (floating) */}
             <button
                onClick={onClose}
@@ -340,6 +359,9 @@ export const ViewMarkdownModal = ({
                         <h3 className="text-sm font-medium text-gray-500">
                            Photos
                         </h3>
+                        <span className="text-xs text-gray-400">
+                           Max 10 photos per upload
+                        </span>
                      </div>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {/* Uploading overlay over grid */}
@@ -465,9 +487,14 @@ export const ViewMarkdownModal = ({
                {/* Photos Empty State - keep photos area above notes even when empty */}
                {markdown.photos.length === 0 && (
                   <div className="mb-8">
-                     <h3 className="text-sm font-medium text-gray-500 mb-4">
-                        Photos
-                     </h3>
+                     <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-medium text-gray-500">
+                           Photos
+                        </h3>
+                        <span className="text-xs text-gray-400">
+                           Max 10 photos per upload
+                        </span>
+                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {isUploadingPhotos && (
                            <div className="col-span-2 md:col-span-3">
@@ -540,6 +567,13 @@ export const ViewMarkdownModal = ({
                      <h3 className="text-sm font-medium text-gray-500">
                         Notes
                      </h3>
+                     {uploadNotice && (
+                        <div className="px-6 pb-4 -mt-2">
+                           <div className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2">
+                              {uploadNotice}
+                           </div>
+                        </div>
+                     )}
                   </div>
 
                   {/* Add Note tile / composer at top */}
@@ -877,6 +911,7 @@ export const ViewMarkdownModal = ({
             confirmText="Delete"
             cancelText="Cancel"
             onConfirm={() => {
+               setIsDeletingMarkdown(true);
                dispatch(setLoading(true));
                markdownAPI
                   .deleteMarkdown(markdownId)
@@ -896,6 +931,9 @@ export const ViewMarkdownModal = ({
                         )
                      );
                      setConfirmDeleteMarkdown(false);
+                  })
+                  .finally(() => {
+                     setIsDeletingMarkdown(false);
                   });
             }}
             onCancel={() => setConfirmDeleteMarkdown(false)}
