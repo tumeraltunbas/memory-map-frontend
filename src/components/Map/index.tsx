@@ -18,22 +18,36 @@ import { ViewMarkdownModal } from '../Modals/ViewMarkdownModal';
 import '../../styles/marker.css';
 import '../../styles/cursor.css';
 import LocationMarker from '../../../public/cursors/location.svg';
+import type { Feature, FeatureCollection, Point } from 'geojson';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAP_BOX_ACCESS_KEY || '';
 
 interface MapProps {
    targetLocation: MapLocation | null;
+   onLoadingChange?: (loading: boolean) => void;
 }
 
-export const Map = ({ targetLocation }: MapProps) => {
+export const Map = ({ targetLocation, onLoadingChange }: MapProps) => {
    const dispatch = useDispatch();
    const { cursorType } = useCursor();
 
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [activeMarkerId, setActiveMarkerId] = useState<string | null>(null);
+   const [geoJsonData, setGeoJsonData] = useState<FeatureCollection<Point>>({
+      type: 'FeatureCollection',
+      features: [],
+   });
+   const geoJsonDataRef = useRef<FeatureCollection<Point>>({
+      type: 'FeatureCollection',
+      features: [],
+   });
 
    const mapContainerRef = useRef<HTMLDivElement>(null);
    const mapInstanceRef = useRef<MapboxMap | null>(null);
+
+   useEffect(() => {
+      geoJsonDataRef.current = geoJsonData;
+   }, [geoJsonData]);
 
    useEffect(() => {
       const map = mapInstanceRef.current;
@@ -92,13 +106,11 @@ export const Map = ({ targetLocation }: MapProps) => {
 
          const { lngLat } = event;
 
+         // Skip proximity duplicate creation (client-side) to reduce noise
          const existingMarker = Object.values(markersRef.current).find(
             (marker) => isNearby(marker.getLngLat(), lngLat)
          );
-
-         if (existingMarker) {
-            return;
-         }
+         if (existingMarker) return;
 
          dispatch(setLoading(true));
          try {
@@ -213,63 +225,240 @@ export const Map = ({ targetLocation }: MapProps) => {
 
       map.on('load', () => {
          mapInstanceRef.current = map;
+
+         if (!map.getSource('markdowns')) {
+            map.addSource('markdowns', {
+               type: 'geojson',
+               data: geoJsonDataRef.current,
+            });
+
+            // Fallback circle layer for immediate visibility
+            if (!map.getLayer('markdowns-circle')) {
+               map.addLayer({
+                  id: 'markdowns-circle',
+                  type: 'circle',
+                  source: 'markdowns',
+                  paint: {
+                     'circle-radius': 6,
+                     'circle-color': '#9E7B9B',
+                     'circle-stroke-color': '#FFFFFF',
+                     'circle-stroke-width': 1.5,
+                  },
+               });
+            }
+
+            // Ensure custom icon is registered
+            if (!map.hasImage('markdown-icon')) {
+               const img = new Image(24, 24);
+               img.crossOrigin = 'anonymous';
+               img.onload = () => {
+                  if (!map.hasImage('markdown-icon')) {
+                     map.addImage('markdown-icon', img as any);
+                  }
+                  if (!map.getLayer('markdowns-layer')) {
+                     map.addLayer({
+                        id: 'markdowns-layer',
+                        type: 'symbol',
+                        source: 'markdowns',
+                        layout: {
+                           'icon-image': 'markdown-icon',
+                           'icon-size': 1,
+                           'icon-allow-overlap': true,
+                        },
+                     });
+                  }
+                  if (map.getLayer('markdowns-circle')) {
+                     map.removeLayer('markdowns-circle');
+                  }
+               };
+               img.src = LocationMarker as unknown as string;
+            } else {
+               if (!map.getLayer('markdowns-layer')) {
+                  map.addLayer({
+                     id: 'markdowns-layer',
+                     type: 'symbol',
+                     source: 'markdowns',
+                     layout: {
+                        'icon-image': 'markdown-icon',
+                        'icon-size': 1,
+                        'icon-allow-overlap': true,
+                     },
+                  });
+               }
+               if (map.getLayer('markdowns-circle')) {
+                  map.removeLayer('markdowns-circle');
+               }
+            }
+
+            const handleClick = async (e: any) => {
+               const feature = e.features && e.features[0];
+               const id = feature && (feature.properties as any)?.markdownId;
+               if (!id) return;
+               try {
+                  setIsViewModalOpen(true);
+                  setActiveMarkerId(id);
+                  const markdownDetails =
+                     await markdownAPI.getSingleMarkdown(id);
+                  dispatch(
+                     addMarkdown({
+                        ...markdownDetails,
+                        createdAt: new Date(markdownDetails.createdAt),
+                        updatedAt: new Date(markdownDetails.updatedAt),
+                     })
+                  );
+               } catch (error) {
+                  console.error('Error fetching markdown details:', error);
+                  dispatch(
+                     setError(
+                        error instanceof Error
+                           ? error.message
+                           : 'Failed to fetch markdown details'
+                     )
+                  );
+               }
+            };
+            map.on('click', 'markdowns-layer', handleClick);
+            map.on('click', 'markdowns-circle', handleClick);
+         }
       });
 
-      map.on('style.load', () => {});
+      map.on('style.load', () => {
+         // Some basemap configs reload style; ensure our source/layer exists
+         if (!map.getSource('markdowns')) {
+            map.addSource('markdowns', {
+               type: 'geojson',
+               data: geoJsonDataRef.current,
+            });
+
+            // Fallback circle layer for immediate visibility
+            if (!map.getLayer('markdowns-circle')) {
+               map.addLayer({
+                  id: 'markdowns-circle',
+                  type: 'circle',
+                  source: 'markdowns',
+                  paint: {
+                     'circle-radius': 6,
+                     'circle-color': '#9E7B9B',
+                     'circle-stroke-color': '#FFFFFF',
+                     'circle-stroke-width': 1.5,
+                  },
+               });
+            }
+
+            // Re-register icon after style reload
+            if (!map.hasImage('markdown-icon')) {
+               const img = new Image(24, 24);
+               img.crossOrigin = 'anonymous';
+               img.onload = () => {
+                  if (!map.hasImage('markdown-icon')) {
+                     map.addImage('markdown-icon', img as any);
+                  }
+                  if (!map.getLayer('markdowns-layer')) {
+                     map.addLayer({
+                        id: 'markdowns-layer',
+                        type: 'symbol',
+                        source: 'markdowns',
+                        layout: {
+                           'icon-image': 'markdown-icon',
+                           'icon-size': 1,
+                           'icon-allow-overlap': true,
+                        },
+                     });
+                  }
+                  if (map.getLayer('markdowns-circle')) {
+                     map.removeLayer('markdowns-circle');
+                  }
+               };
+               img.src = LocationMarker as unknown as string;
+            } else {
+               if (!map.getLayer('markdowns-layer')) {
+                  map.addLayer({
+                     id: 'markdowns-layer',
+                     type: 'symbol',
+                     source: 'markdowns',
+                     layout: {
+                        'icon-image': 'markdown-icon',
+                        'icon-size': 1,
+                        'icon-allow-overlap': true,
+                     },
+                  });
+               }
+               if (map.getLayer('markdowns-circle')) {
+                  map.removeLayer('markdowns-circle');
+               }
+            }
+
+            const src = map.getSource('markdowns') as
+               | mapboxgl.GeoJSONSource
+               | undefined;
+            if (src) src.setData(geoJsonDataRef.current as any);
+
+            const handleClick = async (e: any) => {
+               const feature = e.features && e.features[0];
+               const id = feature && (feature.properties as any)?.markdownId;
+               if (!id) return;
+               try {
+                  setIsViewModalOpen(true);
+                  setActiveMarkerId(id);
+                  const markdownDetails =
+                     await markdownAPI.getSingleMarkdown(id);
+                  dispatch(
+                     addMarkdown({
+                        ...markdownDetails,
+                        createdAt: new Date(markdownDetails.createdAt),
+                        updatedAt: new Date(markdownDetails.updatedAt),
+                     })
+                  );
+               } catch (error) {
+                  console.error('Error fetching markdown details:', error);
+                  dispatch(
+                     setError(
+                        error instanceof Error
+                           ? error.message
+                           : 'Failed to fetch markdown details'
+                     )
+                  );
+               }
+            };
+            map.on('click', 'markdowns-layer', handleClick);
+            map.on('click', 'markdowns-circle', handleClick);
+         } else {
+            const src = map.getSource('markdowns') as
+               | mapboxgl.GeoJSONSource
+               | undefined;
+            if (src) src.setData(geoJsonDataRef.current as any);
+         }
+      });
 
       const loadMarkdowns = async () => {
          dispatch(setLoading(true));
+         onLoadingChange?.(true);
          try {
             const response = await markdownAPI.getAllMarkdowns();
-
-            response.markdowns.forEach((markdown: MarkdownResponse) => {
-               const markerId = markdown.markdownId;
-
-               const markerElement = document.createElement('div');
-               markerElement.className = 'marker';
-
-               const img = document.createElement('img');
-               img.src = LocationMarker;
-               img.className = 'w-6 h-6';
-               markerElement.appendChild(img);
-
-               markerElement.addEventListener('click', async (e) => {
-                  e.stopPropagation();
-                  try {
-                     setIsViewModalOpen(true);
-                     setActiveMarkerId(markerId);
-                     const markdownDetails =
-                        await markdownAPI.getSingleMarkdown(markerId);
-                     dispatch(
-                        addMarkdown({
-                           ...markdownDetails,
-                           createdAt: new Date(markdownDetails.createdAt),
-                           updatedAt: new Date(markdownDetails.updatedAt),
-                        })
-                     );
-                  } catch (error) {
-                     console.error('Error fetching markdown details:', error);
-                     dispatch(
-                        setError(
-                           error instanceof Error
-                              ? error.message
-                              : 'Failed to fetch markdown details'
-                        )
-                     );
-                  }
-               });
-
-               const marker = new mapboxgl.Marker({
-                  element: markerElement,
-                  anchor: 'bottom',
-                  draggable: false,
+            const features: Feature<Point>[] = response.markdowns.map(
+               (markdown: MarkdownResponse) => ({
+                  type: 'Feature',
+                  geometry: {
+                     type: 'Point',
+                     coordinates: [
+                        markdown.geoLocation.x,
+                        markdown.geoLocation.y,
+                     ],
+                  },
+                  properties: { markdownId: markdown.markdownId },
                })
-                  .setLngLat([markdown.geoLocation.x, markdown.geoLocation.y])
-                  .addTo(map);
-
-               markersRef.current[markerId] = marker;
-            });
-
+            );
+            const collection: FeatureCollection<Point> = {
+               type: 'FeatureCollection',
+               features,
+            };
+            setGeoJsonData(collection);
+            // Also push directly to map source if available now
+            // If map source already exists, update immediately; otherwise, rely on refs on style/load
+            const src = map.getSource('markdowns') as
+               | mapboxgl.GeoJSONSource
+               | undefined;
+            if (src) src.setData(collection as any);
             dispatch(setMarkdowns(response.markdowns));
          } catch (error) {
             console.error('Error loading markdowns:', error);
@@ -280,13 +469,14 @@ export const Map = ({ targetLocation }: MapProps) => {
                      : 'Failed to load markdowns'
                )
             );
+         } finally {
+            onLoadingChange?.(false);
          }
       };
 
       loadMarkdowns();
 
       return () => {
-         Object.values(markersRef.current).forEach((marker) => marker.remove());
          map.remove();
          mapInstanceRef.current = null;
       };
@@ -314,6 +504,18 @@ export const Map = ({ targetLocation }: MapProps) => {
       }
    }, [cursorType]);
 
+   // Keep map source synced when geoJsonData changes
+   useEffect(() => {
+      const map = mapInstanceRef.current;
+      if (!map) return;
+      const src = map.getSource('markdowns') as
+         | mapboxgl.GeoJSONSource
+         | undefined;
+      if (src) {
+         src.setData(geoJsonData as any);
+      }
+   }, [geoJsonData]);
+
    return (
       <>
          <div
@@ -340,14 +542,13 @@ export const Map = ({ targetLocation }: MapProps) => {
             markdownId={activeMarkerId || ''}
             onDelete={() => {
                if (!activeMarkerId) return;
-               // Remove locally so the marker disappears immediately
-               const marker = markersRef.current[activeMarkerId];
-               if (marker) {
-                  marker.remove();
-                  delete markersRef.current[activeMarkerId];
-               }
-               // Also update list in store by refetching or relying on backend
-               // Here we just close the modal; list views would be updated on next fetch
+               // Remove from GeoJSON so layer updates immediately
+               setGeoJsonData((prev) => ({
+                  type: 'FeatureCollection',
+                  features: prev.features.filter(
+                     (f) => (f.properties as any)?.markdownId !== activeMarkerId
+                  ),
+               }));
                setIsViewModalOpen(false);
                setActiveMarkerId(null);
             }}
